@@ -1,7 +1,7 @@
 export class UserEntity {
-  id: bigint;
-  firstName: string;
-  lastName: string;
-  email: string;
-  roles: string[];
+  id = 0;
+  firstName = '';
+  lastName = '';
+  email = '';
+  roles: string[] = [];
 }

@@ -33,13 +33,14 @@ export class NewsService {
     return this.news;
   }
 
-  findByIndex(index: number): News | null {
-    console.assert(
-      typeof this.news[index] !== 'undefined',
-      '[findByIndex] Invalid',
-    );
-    if (typeof this.news[index] !== 'undefined') {
-      return this.news[index];
+  async findByIndex(idNews: number): Promise<News | null> {
+    const found = this.news.find((item) => {
+      return item.id === +idNews;
+    });
+
+    console.assert(typeof found !== 'undefined', '[findByIndex] Invalid');
+    if (typeof found !== 'undefined') {
+      return found;
     }
 
     return null;

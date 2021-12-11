@@ -1,4 +1,5 @@
+import { Comment } from './comment.interface';
+
 export interface NewsComments {
-  id: number;
-  comments: Comment[];
+  [idNews: number]: Comment[];
 }

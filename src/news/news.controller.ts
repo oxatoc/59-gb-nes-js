@@ -10,11 +10,16 @@ import {
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { News } from './news.interface';
-import { htmlTemplate, newsTemplate } from '../views/template';
+import { emptyNews, htmlTemplate, newsTemplate } from '../views/template';
+import { templateDetail } from '../views/template-detail';
+import { CommentsService } from './comments/comments.service';
 
 @Controller('news')
 export class NewsController {
-  constructor(private newsService: NewsService) {}
+  constructor(
+    private readonly newsService: NewsService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
   @Get('all')
   async getAll(): Promise<News[]> {
@@ -22,8 +27,26 @@ export class NewsController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id): Promise<News | undefined> {
+  async getById(@Param('id') id: number): Promise<News | null> {
     return this.newsService.findByIndex(id);
+  }
+
+  @Get(':id/detail')
+  async getDetailById(@Param('id') idNews: number): Promise<string> {
+    return Promise.all([
+      this.newsService.findByIndex(idNews),
+      this.commentsService.findAll(idNews),
+    ]).then((values) => {
+      const newsItem = values[0];
+      const newsComments = values[1];
+      if (newsItem == null) {
+        return emptyNews();
+      }
+      if (newsComments == null) {
+        return templateDetail(newsItem, []);
+      }
+      return templateDetail(newsItem, newsComments);
+    });
   }
 
   @Post()
