@@ -10,13 +10,24 @@ import {
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { News } from './news.interface';
+import { htmlTemplate, newsTemplate } from '../views/template';
 
 @Controller('news')
 export class NewsController {
   constructor(private newsService: NewsService) {}
 
+  @Get('all')
+  async getAll(): Promise<News[]> {
+    return this.newsService.findAll();
+  }
+
+  @Get(':id')
+  async getById(@Param('id') id): Promise<News | undefined> {
+    return this.newsService.findByIndex(id);
+  }
+
   @Post()
-  create(@Body() news: News) {
+  async create(@Body() news: News): Promise<News> {
     return this.newsService.create(news);
   }
 
@@ -33,13 +44,9 @@ export class NewsController {
   }
 
   @Get()
-  getNews() {
-    return this.newsService.findAll();
-  }
-
-  @Get('all')
-  index() {
-    return this.newsService.findAll();
+  async getViewAll(): Promise<string> {
+    const news = this.newsService.findAll();
+    return htmlTemplate(newsTemplate(news));
   }
 
   @Post(':id')
