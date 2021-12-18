@@ -17,12 +17,13 @@ import { News } from './news.interface';
 import { emptyNews, htmlTemplate, newsTemplate } from '../views/template';
 import { templateDetail } from '../views/template-detail';
 import { CommentsService } from './comments/comments.service';
-import { NewsIdDto } from './dtos/news-id.dto';
-import { NewsCreateDto } from './dtos/news-create.dto';
+import { NewsIdDto } from '../dtos/news-id.dto';
+import { NewsCreateDto } from '../dtos/news-create.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoader } from '../utils/helper-file-loader';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
+import { fileExtensionCheck } from '../utils/file-extension-check';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoader = new HelperFileLoader();
@@ -43,6 +44,7 @@ export class NewsController {
         destination: helperFileLoader.destinationPath,
         filename: helperFileLoader.customFileName,
       }),
+      fileFilter: fileExtensionCheck,
     }),
   )
   async create(

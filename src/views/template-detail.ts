@@ -16,7 +16,10 @@ export const templateDetail = (newsItem: News, comments: Comment[]) => {
 export const commentTemplate = (comment: Comment): string => {
   return `
     <div class='row'>
-      <div class='col-7'>${comment.comment}</div>
+      <div class='col-2'>
+        <img src="http://localhost:3000/${comment?.avatar}" alt='' style='width: 60px; object-fit: contain'>
+      </div>
+      <div class='col-5'>${comment.comment}</div>
       <div class='col-5'>
         <a href='/news-comments/${comment.id}'>Редактировать</a>
       </div>

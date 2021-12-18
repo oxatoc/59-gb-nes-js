@@ -4,7 +4,7 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator';
-import { News } from '../news.interface';
+import { News } from '../news/news.interface';
 
 export class NewsCreateDto implements News {
   @IsNotEmpty()
