@@ -11,15 +11,15 @@ export class NewsService {
       title: 'news1',
       description: 'description1',
       author: 'author1',
-      createdAt: new Date('2021-01-01 00:00:00'),
+      createdAt: '2021-01-01 00:00:00',
+      cover: '',
     };
     this.news.push(news);
   }
 
   create(news: News): News {
     const id = Math.round(Math.random() * 10000) + 1;
-    const createdAt = new Date();
-    const newsItem = { ...news, id, createdAt };
+    const newsItem = { ...news, id };
     this.news.push(newsItem);
     return newsItem;
   }

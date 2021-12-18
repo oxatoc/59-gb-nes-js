@@ -24,6 +24,7 @@ export const newsItemTemplate = (newsItem: News, comments = '') => {
   return `
         <div class="col-lg-6">
           <div class="card">
+            <img src='http://localhost:3000/${newsItem?.cover}' class="card-img-top" style="height: 200px; object-fit: cover;" alt=''>
             <div class="card-body">
               <h5 class="card-title">${newsItem.title}</h5>
               <h6 class="card-subtitle mb-2 text-muted">
