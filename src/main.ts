@@ -6,22 +6,27 @@ import * as hbs from 'hbs';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
+const staticAssets = join(__dirname, '../../public');
+const baseViewsDir = join(__dirname, '../../views');
+const layoutsDir = join(__dirname, '../../views/layouts');
+const partials = join(__dirname, '../../views/partials');
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
 
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.useStaticAssets(staticAssets);
 
-  app.setBaseViewsDir(join(__dirname, '..', 'src/views'));
+  app.setBaseViewsDir(baseViewsDir);
   app.engine(
     'hbs',
     expressHbs.engine({
-      layoutsDir: join(__dirname, '..', 'src/views/layouts'),
+      layoutsDir: layoutsDir,
       defaultLayout: 'layout',
       extname: 'hbs',
     }),
   );
-  hbs.registerPartials(__dirname + '/views/partials');
+  hbs.registerPartials(partials);
   app.setViewEngine('hbs');
 
   await app.listen(3000);

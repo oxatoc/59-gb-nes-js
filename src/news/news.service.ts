@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { News } from './news.interface';
+import { NewsChange } from './news-change';
+import { NewsChanges } from './news-changes';
 
 @Injectable()
 export class NewsService {
@@ -43,6 +45,45 @@ export class NewsService {
       return found;
     }
 
+    return null;
+  }
+
+  async getChanges(id: number, news: News): Promise<NewsChanges | null> {
+    const previousNews: { [index: string]: any } = (await this.findByIndex(
+      id,
+    )) as News;
+
+    if (!previousNews) {
+      return null;
+    }
+
+    const actualNews: { [index: string]: any } = news;
+
+    const changes = [];
+    const captions: { [index: string]: string } = {
+      title: 'Заголовок',
+      description: 'Описание',
+      author: 'Автор',
+      cover: 'Изображение',
+      createdAt: 'Создано',
+    };
+
+    for (const key in previousNews) {
+      const change = new NewsChange();
+      change.previousValue = previousNews[key];
+      change.actualValue = actualNews[key];
+      if (change.actualValue && actualNews[key] !== previousNews[key]) {
+        change.fieldName = key;
+        change.fieldCaption = captions[key];
+        changes.push(change);
+      }
+    }
+    if (changes.length > 0) {
+      const changesItem = new NewsChanges();
+      changesItem.id = previousNews.id;
+      changesItem.changes = changes;
+      return changesItem;
+    }
     return null;
   }
 

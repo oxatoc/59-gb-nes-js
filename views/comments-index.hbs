@@ -1,0 +1,7 @@
+{{#if comments}}
+  {{#each comments}}
+    {{> comments-item comment=this}}
+  {{/each}}
+{{else}}
+  <h1>Список комментариев пуст!</h1>
+{{/if}}
