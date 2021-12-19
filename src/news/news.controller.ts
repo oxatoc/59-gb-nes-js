@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Render,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -21,13 +22,12 @@ import { NewsIdDto } from '../dtos/news-id.dto';
 import { NewsCreateDto } from '../dtos/news-create.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { HelperFileLoader } from '../utils/helper-file-loader';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { fileExtensionCheck } from '../utils/file-extension-check';
+import { NewsHelperFileLoader } from '../classes/helper-file-loader/NewsHelperFileLoader';
+import { MailService } from '../mail/mail.service';
 
-const PATH_NEWS = '/news-static/';
-const helperFileLoader = new HelperFileLoader();
-helperFileLoader.path = PATH_NEWS;
+const newsHelperFileLoader = new NewsHelperFileLoader();
 
 @Controller('news')
 @UseInterceptors(LoggingInterceptor)
@@ -35,14 +35,15 @@ export class NewsController {
   constructor(
     private readonly newsService: NewsService,
     private readonly commentsService: CommentsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post()
   @UseInterceptors(
     FilesInterceptor('cover', 1, {
       storage: diskStorage({
-        destination: helperFileLoader.destinationPath,
-        filename: helperFileLoader.customFileName,
+        destination: newsHelperFileLoader.destinationPath,
+        filename: newsHelperFileLoader.customFileName,
       }),
       fileFilter: fileExtensionCheck,
     }),
@@ -55,33 +56,14 @@ export class NewsController {
     const coverItem = cover[0];
 
     if (coverItem?.filename.length > 0) {
-      coverPath = PATH_NEWS + coverItem.filename;
+      coverPath = newsHelperFileLoader.path + coverItem.filename;
     }
+
+    const _news = this.newsService.create({ ...news, cover: coverPath });
+    await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
 
     return this.newsService.create({ ...news, ...{ cover: coverPath } });
   }
-
-  @Post('upload-file')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: helperFileLoader.destinationPath,
-        filename: helperFileLoader.customFileName,
-      }),
-    }),
-  )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {}
-
-  @Post('upload-files')
-  @UseInterceptors(
-    FilesInterceptor('file', 3, {
-      storage: diskStorage({
-        destination: helperFileLoader.destinationPath,
-        filename: helperFileLoader.customFileName,
-      }),
-    }),
-  )
-  async uploadFiles(@UploadedFiles() file: Express.Multer.File) {}
 
   @Put(':id')
   async update(@Param('id') id: number, @Body() news: News) {
@@ -140,8 +122,9 @@ export class NewsController {
   }
 
   @Get()
-  async getViewAll(): Promise<string> {
+  @Render('news-list')
+  async getViewAll() {
     const news = this.newsService.findAll();
-    return htmlTemplate(newsTemplate(news));
+    return { news };
   }
 }

@@ -6,12 +6,16 @@ import { AppService } from './app.service';
 import { NewsModule } from './news/news.module';
 import { CalcModule } from './calc/calc.module';
 import { LoggerMiddleware } from './middlwares/logger.middleware';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     NewsModule,
     CalcModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
+    MailModule,
+    ConfigModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

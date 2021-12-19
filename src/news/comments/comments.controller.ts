@@ -15,13 +15,11 @@ import { Comment } from './comment.interface';
 import { CommentCreateDto } from '../../dtos/comment-create-dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { HelperFileLoader } from '../../utils/helper-file-loader';
 import { IdNewsDto } from '../../dtos/id-news-dto';
 import { fileExtensionCheck } from '../../utils/file-extension-check';
+import { CommentsHelperFileLoader } from '../../classes/helper-file-loader/CommentsHelperFileLoader';
 
-const PATH_AVATARS = '/avatars-static/';
-const helperFileLoader = new HelperFileLoader();
-helperFileLoader.path = PATH_AVATARS;
+const commentsHelperFileLoader = new CommentsHelperFileLoader();
 
 @Controller('news-comments')
 export class CommentsController {
@@ -36,8 +34,8 @@ export class CommentsController {
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
       storage: diskStorage({
-        destination: helperFileLoader.destinationPath,
-        filename: helperFileLoader.customFileName,
+        destination: commentsHelperFileLoader.destinationPath,
+        filename: commentsHelperFileLoader.customFileName,
       }),
       fileFilter: fileExtensionCheck,
     }),
@@ -50,7 +48,7 @@ export class CommentsController {
     let avatarPath = '';
     const avatarItem = avatar[0];
     if (avatarItem?.filename.length > 0) {
-      avatarPath = PATH_AVATARS + avatarItem.filename;
+      avatarPath = commentsHelperFileLoader.path + avatarItem.filename;
     }
     return this.commentsService.create(params.idNews, {
       ...commentCreateDto,
