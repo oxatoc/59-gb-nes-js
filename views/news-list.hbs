@@ -1,0 +1,9 @@
+{{#if newsItems}}
+  <div class="row">
+    {{#each newsItems}}
+      {{> news-item news=this}}
+    {{/each}}
+  </div>
+{{else}}
+  <h1>Список новостей пуст!</h1>
+{{/if}}

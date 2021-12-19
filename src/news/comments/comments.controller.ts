@@ -7,35 +7,44 @@ import {
   Patch,
   Post,
   Query,
+  Render,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { Comment } from './comment.interface';
 import { CommentCreateDto } from '../../dtos/comment-create-dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { IdNewsDto } from '../../dtos/id-news-dto';
 import { fileExtensionCheck } from '../../utils/file-extension-check';
-import { CommentsHelperFileLoader } from '../../classes/helper-file-loader/CommentsHelperFileLoader';
-
-const commentsHelperFileLoader = new CommentsHelperFileLoader();
+import { destinationPathComment } from '../../utils/destination-path-comment';
+import { customFileName } from '../../utils/custom-file-name';
+import { AVATARS_PATH } from '../../types/types';
 
 @Controller('news-comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
+  @Get()
+  @Render('comments-index')
+  async index() {
+    const comments = await this.commentsService.index();
+    return { comments };
+  }
+
   @Get('all')
-  getAll(@Query('idNews') idNews: number): Promise<Comment[] | undefined> {
+  getAll(@Query('idNews') idNews: number) {
     return this.commentsService.findAll(idNews);
   }
 
   @Post()
   @UseInterceptors(
-    FilesInterceptor('avatar', 1, {
+    FileInterceptor('avatar', {
       storage: diskStorage({
-        destination: commentsHelperFileLoader.destinationPath,
-        filename: commentsHelperFileLoader.customFileName,
+        destination: destinationPathComment,
+        filename: customFileName,
       }),
       fileFilter: fileExtensionCheck,
     }),
@@ -43,12 +52,11 @@ export class CommentsController {
   create(
     @Query() params: IdNewsDto,
     @Body() commentCreateDto: CommentCreateDto,
-    @UploadedFiles() avatar: Express.Multer.File[],
+    @UploadedFile() avatar: Express.Multer.File,
   ): Promise<Comment> {
     let avatarPath = '';
-    const avatarItem = avatar[0];
-    if (avatarItem?.filename.length > 0) {
-      avatarPath = commentsHelperFileLoader.path + avatarItem.filename;
+    if (avatar?.filename.length > 0) {
+      avatarPath = AVATARS_PATH + avatar.filename;
     }
     return this.commentsService.create(params.idNews, {
       ...commentCreateDto,
