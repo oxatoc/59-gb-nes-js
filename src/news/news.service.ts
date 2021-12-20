@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { News } from './news.interface';
 import { NewsChange } from './news-change';
 import { NewsChanges } from './news-changes';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class NewsService {
   private readonly news: News[] = [];
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     const news: News = {
       id: 1,
       title: 'news1',
@@ -32,6 +33,7 @@ export class NewsService {
   }
 
   findAll(): News[] {
+    console.log('config', this.configService.get<string>('SMTP_HOST'));
     return this.news;
   }
 

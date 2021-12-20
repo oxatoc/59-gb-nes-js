@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { News } from '../news/news.interface';
-import { NewsChange } from '../news/news-change';
 import { NewsChanges } from '../news/news-changes';
 
 @Injectable()

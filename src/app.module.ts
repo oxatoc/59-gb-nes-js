@@ -15,7 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     CalcModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
     MailModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService],
