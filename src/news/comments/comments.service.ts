@@ -23,6 +23,15 @@ export class CommentsService {
     return this.comments?.[idNews];
   }
 
+  async index() {
+    let comments: Comment[] = [];
+    for (const idNews in this.comments) {
+      const newsComments = this.comments[idNews];
+      comments = [...comments, ...newsComments];
+    }
+    return comments;
+  }
+
   async remove(idNews: number, idComment: string): Promise<boolean> {
     const index = this.comments?.[idNews].findIndex((x) => x.id === idComment);
     if (index !== -1) {

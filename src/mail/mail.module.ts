@@ -7,8 +7,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '../../credentials';
 
 const transport = `smtps://${SMTP_USER}:${SMTP_PASSWORD}@${SMTP_HOST}`;
-console.log('transport', transport);
-console.log('dirname', __dirname);
 
 @Module({
   providers: [MailService],

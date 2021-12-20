@@ -9,25 +9,22 @@ import {
   Post,
   Put,
   Render,
-  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { News } from './news.interface';
-import { emptyNews, htmlTemplate, newsTemplate } from '../views/template';
-import { templateDetail } from '../views/template-detail';
 import { CommentsService } from './comments/comments.service';
 import { NewsIdDto } from '../dtos/news-id.dto';
 import { NewsCreateDto } from '../dtos/news-create.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { fileExtensionCheck } from '../utils/file-extension-check';
-import { NewsHelperFileLoader } from '../classes/helper-file-loader/NewsHelperFileLoader';
 import { MailService } from '../mail/mail.service';
-
-const newsHelperFileLoader = new NewsHelperFileLoader();
+import { customFileName } from '../utils/custom-file-name';
+import { destinationPathNews } from '../utils/destination-path-news';
+import { NEWS_PATH } from '../types/types';
 
 @Controller('news')
 @UseInterceptors(LoggingInterceptor)
@@ -42,8 +39,8 @@ export class NewsController {
   @UseInterceptors(
     FilesInterceptor('cover', 1, {
       storage: diskStorage({
-        destination: newsHelperFileLoader.destinationPath,
-        filename: newsHelperFileLoader.customFileName,
+        destination: destinationPathNews,
+        filename: customFileName,
       }),
       fileFilter: fileExtensionCheck,
     }),
@@ -56,13 +53,12 @@ export class NewsController {
     const coverItem = cover[0];
 
     if (coverItem?.filename.length > 0) {
-      coverPath = newsHelperFileLoader.path + coverItem.filename;
+      coverPath = NEWS_PATH + coverItem.filename;
     }
 
     const _news = this.newsService.create({ ...news, cover: coverPath });
     await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
-
-    return this.newsService.create({ ...news, ...{ cover: coverPath } });
+    return _news;
   }
 
   @Put(':id')
@@ -75,6 +71,12 @@ export class NewsController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    const changes = await this.newsService.getChanges(id, news);
+    if (changes) {
+      await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
+    }
+
     return this.newsService.store(news);
   }
 
@@ -88,21 +90,22 @@ export class NewsController {
     return this.newsService.findByIndex(params.id);
   }
 
+  @Get(':id/comments/create')
+  @Render('comment-create')
+  getNewCommentForm(@Param('id') idNews: number) {
+    return { idNews };
+  }
+
   @Get(':id/detail')
-  async getDetailById(@Param('id') idNews: number): Promise<string> {
+  @Render('news-details')
+  async getDetailById(@Param('id') idNews: number) {
     return Promise.all([
       this.newsService.findByIndex(idNews),
       this.commentsService.findAll(idNews),
     ]).then((values) => {
       const newsItem = values[0];
       const newsComments = values[1];
-      if (newsItem == null) {
-        return emptyNews();
-      }
-      if (newsComments == null) {
-        return templateDetail(newsItem, []);
-      }
-      return templateDetail(newsItem, newsComments);
+      return { news: newsItem, comments: newsComments };
     });
   }
 
@@ -125,6 +128,6 @@ export class NewsController {
   @Render('news-list')
   async getViewAll() {
     const news = this.newsService.findAll();
-    return { news };
+    return { newsItems: news };
   }
 }

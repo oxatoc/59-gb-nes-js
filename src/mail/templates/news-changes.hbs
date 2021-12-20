@@ -1,0 +1,16 @@
+<table>
+  <tr>
+    <td>Изменение</td>
+  </tr>
+  {{#each changes}}
+    <tr>
+      <td>
+        <span>{{this.fieldCaption}}</span>
+        <span> было:</span>
+        <span style='text-decoration:line-through;'> {{this.previousValue}}</span>
+        <span> Стало:</span>
+        <span> {{this.actualValue}}</span>
+      </td>
+    </tr>
+  {{/each}}
+</table>
