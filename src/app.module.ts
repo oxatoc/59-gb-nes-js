@@ -27,7 +27,7 @@ import { NewsEntity } from './news/news.entity';
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
         entities: [NewsEntity],
-        synchronize: true,
+        synchronize: config.get('DB_SYNCHRONIZE'),
       }),
       inject: [ConfigService],
     }),

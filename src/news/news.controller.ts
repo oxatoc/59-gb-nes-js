@@ -59,7 +59,7 @@ export class NewsController {
     _newsEntity.description = news.description;
 
     const _news = await this.newsService.create(_newsEntity);
-    // await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
+    await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
     return _news;
   }
 
