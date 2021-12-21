@@ -27,10 +27,10 @@ export class UsersEntity {
   role = '';
 
   // @OneToMany(() => NewsEntity, (news) => news.user)
-  // news: NewsEntity[] = [];
+  // news: NewsEntity[];
 
-  @OneToMany(() => CommentsEntity, (comments) => comments.user)
-  comments: CommentsEntity[] = [];
+  // @OneToMany(() => CommentsEntity, (comments) => comments.user)
+  // comments: CommentsEntity[] = [];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date = new Date();

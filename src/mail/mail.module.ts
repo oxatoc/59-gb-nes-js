@@ -21,7 +21,7 @@ import { ConfigService } from '@nestjs/config';
           from: `"NestJS робот" <${config.get<string>('SMTP_USER')}>`,
         },
         template: {
-          dir: join(__dirname, '../../mail/templates'),
+          dir: join(__dirname, '../../src/mail/templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

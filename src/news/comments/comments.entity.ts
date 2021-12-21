@@ -16,8 +16,8 @@ export class CommentsEntity {
   @Column('text')
   message = '';
 
-  @ManyToOne(() => UsersEntity, (user) => user.comments)
-  user: UsersEntity = new UsersEntity();
+  // @ManyToOne(() => UsersEntity, (user) => user.comments)
+  // user: UsersEntity = new UsersEntity();
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date = new Date();

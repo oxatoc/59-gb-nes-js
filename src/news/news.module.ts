@@ -5,6 +5,7 @@ import { CommentsModule } from './comments/comments.module';
 import { MailModule } from '../mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from './news.entity';
+import { UsersEntity } from '../users/users.entity';
 
 @Module({
   controllers: [NewsController],

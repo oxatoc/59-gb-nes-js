@@ -10,6 +10,8 @@ import { MailModule } from './mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from './news/news.entity';
+import { UsersEntity } from './users/users.entity';
+import { CommentsEntity } from './news/comments/comments.entity';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { NewsEntity } from './news/news.entity';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
-        entities: [NewsEntity],
+        entities: [NewsEntity, UsersEntity],
         synchronize: config.get('DB_SYNCHRONIZE'),
       }),
       inject: [ConfigService],
