@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Render,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import { News } from './news.interface';
 import { CommentsService } from './comments/comments.service';
 import { NewsIdDto } from '../dtos/news-id.dto';
 import { NewsCreateDto } from '../dtos/news-create.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { fileExtensionCheck } from '../utils/file-extension-check';
@@ -25,6 +26,7 @@ import { MailService } from '../mail/mail.service';
 import { customFileName } from '../utils/custom-file-name';
 import { destinationPathNews } from '../utils/destination-path-news';
 import { NEWS_PATH } from '../types/types';
+import { NewsEntity } from './news.entity';
 
 @Controller('news')
 @UseInterceptors(LoggingInterceptor)
@@ -37,7 +39,7 @@ export class NewsController {
 
   @Post()
   @UseInterceptors(
-    FilesInterceptor('cover', 1, {
+    FileInterceptor('cover', {
       storage: diskStorage({
         destination: destinationPathNews,
         filename: customFileName,
@@ -47,17 +49,17 @@ export class NewsController {
   )
   async create(
     @Body() news: NewsCreateDto,
-    @UploadedFiles() cover: Express.Multer.File[],
-  ): Promise<News> {
-    let coverPath;
-    const coverItem = cover[0];
-
-    if (coverItem?.filename.length > 0) {
-      coverPath = NEWS_PATH + coverItem.filename;
+    @UploadedFile() cover: Express.Multer.File,
+  ): Promise<NewsEntity> {
+    const _newsEntity = new NewsEntity();
+    if (cover?.filename?.length > 0) {
+      _newsEntity.cover = NEWS_PATH + cover.filename;
     }
+    _newsEntity.title = news.title;
+    _newsEntity.description = news.description;
 
-    const _news = this.newsService.create({ ...news, cover: coverPath });
-    await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
+    const _news = await this.newsService.create(_newsEntity);
+    // await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
     return _news;
   }
 
@@ -81,8 +83,8 @@ export class NewsController {
   }
 
   @Get('all')
-  async getAll(): Promise<News[]> {
-    return this.newsService.findAll();
+  async getAll(): Promise<NewsEntity[]> {
+    return await this.newsService.findAll();
   }
 
   @Get(':id')

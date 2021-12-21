@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { News } from '../news/news.interface';
 import { NewsChanges } from '../news/news-changes';
+import { NewsEntity } from '../news/news.entity';
 
 @Injectable()
 export class MailService {
@@ -23,7 +24,10 @@ export class MailService {
       });
   }
 
-  async sendNewNewsForAdmins(emails: string[], news: News): Promise<void> {
+  async sendNewNewsForAdmins(
+    emails: string[],
+    news: NewsEntity,
+  ): Promise<void> {
     console.log('Отправляются письма о новой новости администрации ресурса');
 
     for (const email of emails) {

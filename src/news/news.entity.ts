@@ -23,15 +23,15 @@ export class NewsEntity {
   @Column('text', { nullable: true })
   cover = '';
 
-  @ManyToOne(() => CategoriesEntity, (category) => category.news)
-  category: CategoriesEntity = new CategoriesEntity();
-
-  @ManyToOne(() => UsersEntity, (user) => user.news)
-  user: UsersEntity = new UsersEntity();
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date = new Date();
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date = new Date();
+
+  // @ManyToOne(() => CategoriesEntity, (category) => category.news)
+  // category: CategoriesEntity = new CategoriesEntity();
+
+  // @ManyToOne(() => UsersEntity, (user) => user.news)
+  // user: UsersEntity = new UsersEntity();
 }

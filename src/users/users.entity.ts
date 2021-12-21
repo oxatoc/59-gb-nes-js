@@ -26,8 +26,8 @@ export class UsersEntity {
   @Column('text')
   role = '';
 
-  @OneToMany(() => NewsEntity, (news) => news.user)
-  news: NewsEntity[] = [];
+  // @OneToMany(() => NewsEntity, (news) => news.user)
+  // news: NewsEntity[] = [];
 
   @OneToMany(() => CommentsEntity, (comments) => comments.user)
   comments: CommentsEntity[] = [];
