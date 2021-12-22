@@ -5,6 +5,7 @@ import { CommentsEntity } from './comments.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from '../news.entity';
 import { UsersModule } from '../../users/users.module';
+import { UsersEntity } from '../../users/users.entity';
 
 @Module({
   providers: [CommentsService],
@@ -12,7 +13,7 @@ import { UsersModule } from '../../users/users.module';
   exports: [CommentsService],
   imports: [
     UsersModule,
-    TypeOrmModule.forFeature([CommentsEntity, NewsEntity]),
+    TypeOrmModule.forFeature([CommentsEntity, NewsEntity, UsersEntity]),
   ],
 })
 export class CommentsModule {}

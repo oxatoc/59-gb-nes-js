@@ -27,13 +27,13 @@ import { AVATARS_PATH } from '../../types/types';
 import { CommentsEntity } from './comments.entity';
 import { UsersService } from '../../users/users.service';
 import { NewsService } from '../news.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { NewsEntity } from '../news.entity';
+import { Repository } from 'typeorm';
 
 @Controller('news-comments')
 export class CommentsController {
-  constructor(
-    private readonly commentsService: CommentsService,
-    private readonly usersService: UsersService,
-  ) {} // private readonly newsService: NewsService, // , // ,
+  constructor(private readonly commentsService: CommentsService) {}
 
   @Get()
   @Render('comments-index')
@@ -42,10 +42,10 @@ export class CommentsController {
     return { comments };
   }
 
-  // @Get('all')
-  // getAll(@Query('idNews') idNews: number) {
-  //   return this.commentsService.findAll(idNews);
-  // }
+  @Get('all')
+  getAll(@Query('idNews') idNews: number) {
+    return this.commentsService.findAll(idNews);
+  }
 
   @Post()
   @UseInterceptors(
@@ -57,16 +57,8 @@ export class CommentsController {
       fileFilter: fileExtensionCheck,
     }),
   )
-  async create(
-    // @Query() params: IdNewsDto,
-    @Body() commentCreateDto: CommentCreateDto,
-  ) {
-    const comment = new CommentsEntity();
-    comment.message = commentCreateDto.comment;
-    comment.user = await this.usersService.findById(commentCreateDto.authorId);
-    // comment.news = await this.newsService.findById(commentCreateDto.newsId);
-
-    return await this.commentsService.create(comment);
+  async create(@Body() commentCreateDto: CommentCreateDto) {
+    return await this.commentsService.create(commentCreateDto);
   }
 
   @Patch(':id')
@@ -74,11 +66,7 @@ export class CommentsController {
     @Param('id') idComment: number,
     @Body() commentCreateDto: CommentCreateDto,
   ) {
-    const comment = new CommentsEntity();
-    comment.message = commentCreateDto.comment;
-    comment.user = await this.usersService.findById(commentCreateDto.authorId);
-    // comment.news = await this.newsService.findById(commentCreateDto.newsId);
-    return this.commentsService.update(idComment, comment);
+    return this.commentsService.update(idComment, commentCreateDto);
   }
 
   @Delete(':id')
