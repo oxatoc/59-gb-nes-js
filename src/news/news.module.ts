@@ -7,7 +7,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from './news.entity';
 import { UsersModule } from '../users/users.module';
 import { CategoriesModule } from '../categories/categories.module';
-import { UsersEntity } from '../users/users.entity';
 
 @Module({
   controllers: [NewsController],
