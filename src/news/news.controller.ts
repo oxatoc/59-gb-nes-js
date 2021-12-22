@@ -36,7 +36,7 @@ export class NewsController {
   constructor(
     // private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
-    // private readonly categoriesService: CategoriesService,
+    private readonly categoriesService: CategoriesService,
     private readonly newsService: NewsService,
     private readonly mailService: MailService,
   ) {}
