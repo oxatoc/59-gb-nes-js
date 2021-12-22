@@ -94,7 +94,7 @@ export class NewsService {
     return null;
   }
 
-  async store(news: NewsEntity) {
-    return await this.newsRepository.save(news);
+  async store(id: number, news: NewsEntity) {
+    return await this.newsRepository.update(id, news);
   }
 }

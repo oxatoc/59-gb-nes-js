@@ -54,31 +54,15 @@ export class NewsController {
   async create(
     @Body() news: NewsCreateDto,
     @UploadedFile() cover: Express.Multer.File,
-  ): Promise<NewsEntity> {
-    const _user = await this.usersService.findById(news.authorId);
-    if (!_user) {
-      throw new HttpException(
-        'Не существует такого автора',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const _category = await this.categoriesService.findById(news.categoryId);
-    if (!_category) {
-      throw new HttpException(
-        'Не существует такой категории',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  ) {
     const _newsEntity = new NewsEntity();
     if (cover?.filename?.length > 0) {
       _newsEntity.cover = NEWS_PATH + cover.filename;
     }
     _newsEntity.title = news.title;
     _newsEntity.description = news.description;
-    _newsEntity.user = _user;
-    _newsEntity.category = _category;
+    _newsEntity.user = await this.getUser(news.authorId);
+    _newsEntity.category = await this.getCategory(news.categoryId);
 
     const _news = await this.newsService.create(_newsEntity);
     await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
@@ -86,7 +70,7 @@ export class NewsController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() news: NewsEntity) {
+  async update(@Param('id') id: number, @Body() newsCreateDto: NewsCreateDto) {
     const newsItem = this.newsService.findById(id);
 
     if (!newsItem) {
@@ -96,12 +80,19 @@ export class NewsController {
       );
     }
 
+    const news = new NewsEntity();
+    news.title = newsCreateDto.title;
+    news.description = newsCreateDto.description;
+    news.cover = newsCreateDto.cover;
+    news.user = await this.getUser(newsCreateDto.authorId);
+    news.category = await this.getCategory(newsCreateDto.categoryId);
+
     const changes = await this.newsService.getChanges(id, news);
     if (changes) {
       await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
     }
 
-    return this.newsService.store(news);
+    return await this.newsService.store(id, news);
   }
 
   @Get('all')
@@ -154,5 +145,27 @@ export class NewsController {
   async getViewAll() {
     const news = this.newsService.findAll();
     return { newsItems: news };
+  }
+
+  private async getUser(id: number) {
+    const _user = await this.usersService.findById(id);
+    if (!_user) {
+      throw new HttpException(
+        'Не существует такого автора',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return _user;
+  }
+
+  private async getCategory(id: number) {
+    const _category = await this.categoriesService.findById(id);
+    if (!_category) {
+      throw new HttpException(
+        'Не существует такой категории',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return _category;
   }
 }

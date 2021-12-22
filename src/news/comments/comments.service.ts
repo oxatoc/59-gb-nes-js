@@ -13,7 +13,7 @@ export class CommentsService {
     private readonly newsService: NewsService,
   ) {}
 
-  async create(idNews: number, comment: CommentsEntity) {
+  async create(comment: CommentsEntity) {
     return await this.commentsRepository.save(comment);
   }
 

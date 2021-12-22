@@ -1,9 +1,23 @@
 import { Comment } from '../news/comments/comment.interface';
-import { IsNumber, IsString, ValidateIf } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsNumberString,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 export class CommentCreateDto implements Comment {
   @ValidateIf((o) => o.id)
   @IsString()
   id = '';
+
+  @IsNotEmpty()
+  @IsNumberString()
+  authorId: number;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  newsId: number;
 
   @IsString()
   comment = '';
