@@ -12,9 +12,9 @@ import { CategoriesModule } from '../categories/categories.module';
   controllers: [NewsController],
   providers: [NewsService],
   imports: [
-    CommentsModule,
-    UsersModule,
-    CategoriesModule,
+    // CommentsModule,
+    // UsersModule,
+    // CategoriesModule,
     MailModule,
     TypeOrmModule.forFeature([NewsEntity]),
   ],

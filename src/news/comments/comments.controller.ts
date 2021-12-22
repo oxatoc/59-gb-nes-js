@@ -30,22 +30,18 @@ import { NewsService } from '../news.service';
 
 @Controller('news-comments')
 export class CommentsController {
-  constructor(
-    private readonly commentsService: CommentsService,
-    private readonly usersService: UsersService,
-    private readonly newsService: NewsService,
-  ) {}
+  constructor() {} // private readonly newsService: NewsService, // private readonly usersService: UsersService, // private readonly commentsService: CommentsService,
 
   @Get()
   @Render('comments-index')
   async index() {
-    const comments = await this.commentsService.index();
-    return { comments };
+    // const comments = await this.commentsService.index();
+    // return { comments };
   }
 
   @Get('all')
   getAll(@Query('idNews') idNews: number) {
-    return this.commentsService.findAll(idNews);
+    // return this.commentsService.findAll(idNews);
   }
 
   @Post()
@@ -64,10 +60,10 @@ export class CommentsController {
   ) {
     const comment = new CommentsEntity();
     comment.message = commentCreateDto.comment;
-    comment.user = await this.usersService.findById(commentCreateDto.authorId);
-    comment.news = await this.newsService.findById(commentCreateDto.newsId);
+    // comment.user = await this.usersService.findById(commentCreateDto.authorId);
+    // comment.news = await this.newsService.findById(commentCreateDto.newsId);
 
-    return await this.commentsService.create(comment);
+    // return await this.commentsService.create(comment);
   }
 
   @Patch(':id')
@@ -77,18 +73,18 @@ export class CommentsController {
   ) {
     const comment = new CommentsEntity();
     comment.message = commentCreateDto.comment;
-    comment.user = await this.usersService.findById(commentCreateDto.authorId);
-    comment.news = await this.newsService.findById(commentCreateDto.newsId);
-    return this.commentsService.update(idComment, comment);
+    // comment.user = await this.usersService.findById(commentCreateDto.authorId);
+    // comment.news = await this.newsService.findById(commentCreateDto.newsId);
+    // return this.commentsService.update(idComment, comment);
   }
 
   @Delete(':id')
   async remove(@Param('id') idComment: number) {
-    return this.commentsService.remove(idComment);
+    // return this.commentsService.remove(idComment);
   }
 
   @Delete('all')
   async removeAll(@Query('idNews') idNews: number) {
-    return this.commentsService.removeAll(idNews);
+    // return this.commentsService.removeAll(idNews);
   }
 }

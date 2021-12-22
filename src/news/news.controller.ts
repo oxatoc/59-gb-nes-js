@@ -34,11 +34,10 @@ import { CategoriesService } from '../categories/categories.service';
 @UseInterceptors(LoggingInterceptor)
 export class NewsController {
   constructor(
-    private readonly commentsService: CommentsService,
-    private readonly usersService: UsersService,
-    private readonly categoriesService: CategoriesService,
-    private readonly newsService: NewsService,
-    private readonly mailService: MailService,
+    // private readonly commentsService: CommentsService,
+    // private readonly usersService: UsersService,
+    // private readonly categoriesService: CategoriesService,
+    private readonly newsService: NewsService, // private readonly mailService: MailService,
   ) {}
 
   @Post()
@@ -61,13 +60,13 @@ export class NewsController {
     }
     _newsEntity.title = newsCreateDto.title;
     _newsEntity.description = newsCreateDto.description;
-    _newsEntity.user = await this.usersService.findById(newsCreateDto.authorId);
-    _newsEntity.category = await this.categoriesService.findById(
-      newsCreateDto.categoryId,
-    );
+    // _newsEntity.user = await this.usersService.findById(newsCreateDto.authorId);
+    // _newsEntity.category = await this.categoriesService.findById(
+    //   newsCreateDto.categoryId,
+    // );
 
     const _news = await this.newsService.create(_newsEntity);
-    await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
+    // await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
     return _news;
   }
 
@@ -86,22 +85,22 @@ export class NewsController {
     news.title = newsCreateDto.title;
     news.description = newsCreateDto.description;
     news.cover = newsCreateDto.cover;
-    news.user = await this.usersService.findById(newsCreateDto.authorId);
-    news.category = await this.categoriesService.findById(
-      newsCreateDto.categoryId,
-    );
+    // news.user = await this.usersService.findById(newsCreateDto.authorId);
+    // news.category = await this.categoriesService.findById(
+    //   newsCreateDto.categoryId,
+    // );
 
     const changes = await this.newsService.getChanges(id, news);
-    if (changes) {
-      await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
-    }
+    // if (changes) {
+    // await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
+    // }
 
     return await this.newsService.store(id, news);
   }
 
   @Get('all')
-  async getAll(): Promise<NewsEntity[]> {
-    return await this.newsService.findAll();
+  async getAll() {
+    // return await this.newsService.findAll();
   }
 
   @Get(':id')
@@ -120,11 +119,11 @@ export class NewsController {
   async getDetailById(@Param('id') idNews: number) {
     return Promise.all([
       this.newsService.findById(idNews),
-      this.commentsService.findAll(idNews),
+      // this.commentsService.findAll(idNews),
     ]).then((values) => {
       const newsItem = values[0];
-      const newsComments = values[1];
-      return { news: newsItem, comments: newsComments };
+      // const newsComments = values[1];
+      // return { news: newsItem, comments: newsComments };
     });
   }
 
@@ -138,10 +137,10 @@ export class NewsController {
       );
     }
 
-    const comments = await this.commentsService.removeAll(params.id);
+    // const comments = await this.commentsService.removeAll(params.id);
     const news = await this.newsService.delete(params.id);
 
-    return { news, comments };
+    // return { news, comments };
   }
 
   @Get()

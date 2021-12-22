@@ -42,11 +42,9 @@ export class NewsService {
 
   async getChanges(id: number, news: NewsEntity) {
     const storedNews = await this.findById(id);
-
     if (!storedNews) {
       return null;
     }
-
     const previousNews: { [index: string]: any } = storedNews;
 
     const actualNews: { [index: string]: any } = news;
