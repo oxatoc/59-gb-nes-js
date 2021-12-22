@@ -2,10 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { NewsComments } from './news-comments.interface';
 import { Comment } from './comment.interface';
+import { CommentsEntity } from './comments.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CommentsService {
-  private readonly comments: NewsComments = {};
+  // private readonly comments: NewsComments = {};
+
+  constructor(
+    @InjectRepository(CommentsEntity)
+    private readonly commentsRepository: Repository<CommentsEntity>,
+  ) {}
 
   async create(idNews: number, comment: Comment): Promise<Comment> {
     if (!this.comments?.[idNews]) {
@@ -19,8 +27,8 @@ export class CommentsService {
     return commentObj;
   }
 
-  async findAll(idNews: number): Promise<Comment[] | undefined> {
-    return this.comments?.[idNews];
+  async findAll(idNews: number) {
+    return await this.commentsRepository.find({ news: idNews });
   }
 
   async index() {
@@ -41,8 +49,9 @@ export class CommentsService {
     return true;
   }
 
-  async removeAll(idNews: number): Promise<boolean> {
-    return delete this.comments?.[idNews];
+  async removeAll(idNews: number) {
+    const comments = this.findAll(idNews);
+    return await this.commentsRepository.remove(comments);
   }
 
   async update(idComment: string, comment: Comment): Promise<Comment | null> {

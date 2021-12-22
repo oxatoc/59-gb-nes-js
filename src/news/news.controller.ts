@@ -87,7 +87,7 @@ export class NewsController {
 
   @Put(':id')
   async update(@Param('id') id: number, @Body() news: News) {
-    const newsItem = this.newsService.findByIndex(id);
+    const newsItem = this.newsService.findById(id);
 
     if (!newsItem) {
       throw new HttpException(
@@ -110,8 +110,8 @@ export class NewsController {
   }
 
   @Get(':id')
-  async getById(@Param() params: NewsIdDto): Promise<News | null> {
-    return this.newsService.findByIndex(params.id);
+  async getById(@Param() params: NewsIdDto) {
+    return this.newsService.findById(params.id);
   }
 
   @Get(':id/comments/create')
@@ -124,7 +124,7 @@ export class NewsController {
   @Render('news-details')
   async getDetailById(@Param('id') idNews: number) {
     return Promise.all([
-      this.newsService.findByIndex(idNews),
+      this.newsService.findById(idNews),
       this.commentsService.findAll(idNews),
     ]).then((values) => {
       const newsItem = values[0];
@@ -135,13 +135,17 @@ export class NewsController {
 
   @Delete(':id')
   async delete(@Param() params: NewsIdDto) {
-    const newsItem = this.newsService.findByIndex(params.id);
+    const newsItem = this.newsService.findById(params.id);
     if (!newsItem) {
       throw new HttpException(
         `error: news id = ${params.id} not found`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    await this.commentsService.removeAll(params.id);
+    await this.newsService.delete(params.id);
+
     return (
       this.newsService.delete(params.id) &&
       this.commentsService.removeAll(params.id)

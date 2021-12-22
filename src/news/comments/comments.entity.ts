@@ -7,6 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { UsersEntity } from '../../users/users.entity';
+import { NewsEntity } from '../news.entity';
 
 @Entity('comments')
 export class CommentsEntity {
@@ -18,6 +19,9 @@ export class CommentsEntity {
 
   @ManyToOne(() => UsersEntity, (user) => user.comments)
   user: UsersEntity;
+
+  @ManyToOne(() => NewsEntity, (news) => news.comments)
+  news: NewsEntity;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date = new Date();

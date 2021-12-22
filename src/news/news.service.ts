@@ -9,31 +9,34 @@ import { NewsEntity } from './news.entity';
 
 @Injectable()
 export class NewsService {
-  private readonly news: News[] = [];
+  // private readonly news: News[] = [];
 
   constructor(
     private configService: ConfigService,
     @InjectRepository(NewsEntity)
     private newsRepository: Repository<NewsEntity>,
   ) {
-    const news: News = {
-      id: 1,
-      title: 'news1',
-      description: 'description1',
-      author: 'author1',
-      createdAt: '2021-01-01 00:00:00',
-      cover: '',
-    };
-    this.news.push(news);
+    // const news: News = {
+    //   id: 1,
+    //   title: 'news1',
+    //   description: 'description1',
+    //   author: 'author1',
+    //   createdAt: '2021-01-01 00:00:00',
+    //   cover: '',
+    // };
+    // this.news.push(news);
   }
 
   async create(news: NewsEntity) {
     return await this.newsRepository.save(news);
   }
 
-  delete(id: number): News {
-    const index = this.news.findIndex((news) => news.id === id);
-    return this.news.splice(index, 1)[0];
+  async delete(id: number) {
+    const news = await this.findById(id);
+    if (!news) {
+      return news;
+    }
+    return this.newsRepository.remove(news);
   }
 
   async findAll(): Promise<NewsEntity[]> {
@@ -52,27 +55,14 @@ export class NewsService {
     return await this.newsRepository.remove(_news);
   }
 
-  async findByIndex(idNews: number): Promise<News | null> {
-    const found = this.news.find((item) => {
-      return item.id === +idNews;
-    });
+  async getChanges(id: number, news: News) {
+    const storedNews = await this.findById(id);
 
-    console.assert(typeof found !== 'undefined', '[findByIndex] Invalid');
-    if (typeof found !== 'undefined') {
-      return found;
-    }
-
-    return null;
-  }
-
-  async getChanges(id: number, news: News): Promise<NewsChanges | null> {
-    const previousNews: { [index: string]: any } = (await this.findByIndex(
-      id,
-    )) as News;
-
-    if (!previousNews) {
+    if (!storedNews) {
       return null;
     }
+
+    const previousNews: { [index: string]: any } = storedNews;
 
     const actualNews: { [index: string]: any } = news;
 
@@ -104,9 +94,7 @@ export class NewsService {
     return null;
   }
 
-  store(values: News): News {
-    const index = this.news.findIndex((item) => item.id === values.id);
-    this.news[index] = { ...this.news[index], ...values };
-    return this.news[index];
+  async store(news: NewsEntity) {
+    return await this.newsRepository.save(news);
   }
 }
