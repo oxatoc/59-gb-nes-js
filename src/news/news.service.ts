@@ -55,7 +55,7 @@ export class NewsService {
     return await this.newsRepository.remove(_news);
   }
 
-  async getChanges(id: number, news: News) {
+  async getChanges(id: number, news: NewsEntity) {
     const storedNews = await this.findById(id);
 
     if (!storedNews) {

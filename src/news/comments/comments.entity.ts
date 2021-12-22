@@ -12,7 +12,7 @@ import { NewsEntity } from '../news.entity';
 @Entity('comments')
 export class CommentsEntity {
   @PrimaryGeneratedColumn()
-  id = 0;
+  id: number;
 
   @Column('text')
   message = '';

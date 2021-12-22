@@ -86,7 +86,7 @@ export class NewsController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() news: News) {
+  async update(@Param('id') id: number, @Body() news: NewsEntity) {
     const newsItem = this.newsService.findById(id);
 
     if (!newsItem) {
@@ -143,13 +143,10 @@ export class NewsController {
       );
     }
 
-    await this.commentsService.removeAll(params.id);
-    await this.newsService.delete(params.id);
+    const comments = await this.commentsService.removeAll(params.id);
+    const news = await this.newsService.delete(params.id);
 
-    return (
-      this.newsService.delete(params.id) &&
-      this.commentsService.removeAll(params.id)
-    );
+    return { news, comments };
   }
 
   @Get()
