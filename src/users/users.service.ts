@@ -20,6 +20,6 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    return await this.usersRepository.findOne({ id });
+    return await this.usersRepository.findOneOrFail({ id });
   }
 }

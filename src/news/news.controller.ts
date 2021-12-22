@@ -34,11 +34,11 @@ import { CategoriesService } from '../categories/categories.service';
 @UseInterceptors(LoggingInterceptor)
 export class NewsController {
   constructor(
-    private readonly newsService: NewsService,
     private readonly commentsService: CommentsService,
-    private readonly mailService: MailService,
     private readonly usersService: UsersService,
     private readonly categoriesService: CategoriesService,
+    private readonly newsService: NewsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post()
@@ -52,17 +52,19 @@ export class NewsController {
     }),
   )
   async create(
-    @Body() news: NewsCreateDto,
+    @Body() newsCreateDto: NewsCreateDto,
     @UploadedFile() cover: Express.Multer.File,
   ) {
     const _newsEntity = new NewsEntity();
     if (cover?.filename?.length > 0) {
       _newsEntity.cover = NEWS_PATH + cover.filename;
     }
-    _newsEntity.title = news.title;
-    _newsEntity.description = news.description;
-    _newsEntity.user = await this.getUser(news.authorId);
-    _newsEntity.category = await this.getCategory(news.categoryId);
+    _newsEntity.title = newsCreateDto.title;
+    _newsEntity.description = newsCreateDto.description;
+    _newsEntity.user = await this.usersService.findById(newsCreateDto.authorId);
+    _newsEntity.category = await this.categoriesService.findById(
+      newsCreateDto.categoryId,
+    );
 
     const _news = await this.newsService.create(_newsEntity);
     await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
@@ -84,8 +86,10 @@ export class NewsController {
     news.title = newsCreateDto.title;
     news.description = newsCreateDto.description;
     news.cover = newsCreateDto.cover;
-    news.user = await this.getUser(newsCreateDto.authorId);
-    news.category = await this.getCategory(newsCreateDto.categoryId);
+    news.user = await this.usersService.findById(newsCreateDto.authorId);
+    news.category = await this.categoriesService.findById(
+      newsCreateDto.categoryId,
+    );
 
     const changes = await this.newsService.getChanges(id, news);
     if (changes) {
@@ -146,26 +150,26 @@ export class NewsController {
     const news = this.newsService.findAll();
     return { newsItems: news };
   }
-
-  private async getUser(id: number) {
-    const _user = await this.usersService.findById(id);
-    if (!_user) {
-      throw new HttpException(
-        'Не существует такого автора',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return _user;
-  }
-
-  private async getCategory(id: number) {
-    const _category = await this.categoriesService.findById(id);
-    if (!_category) {
-      throw new HttpException(
-        'Не существует такой категории',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return _category;
-  }
+  //
+  // private async getUser(id: number) {
+  //   const _user = await this.usersService.findById(id);
+  //   if (!_user) {
+  //     throw new HttpException(
+  //       'Не существует такого автора',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   return _user;
+  // }
+  //
+  // private async getCategory(id: number) {
+  //   const _category = await this.categoriesService.findById(id);
+  //   if (!_category) {
+  //     throw new HttpException(
+  //       'Не существует такой категории',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   return _category;
+  // }
 }

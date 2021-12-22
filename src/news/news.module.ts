@@ -5,18 +5,19 @@ import { CommentsModule } from './comments/comments.module';
 import { MailModule } from '../mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from './news.entity';
-import { CategoriesEntity } from '../categories/categories.entity';
-import { UsersService } from '../users/users.service';
-import { UsersEntity } from '../users/users.entity';
-import { CategoriesService } from '../categories/categories.service';
+import { UsersModule } from '../users/users.module';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
   controllers: [NewsController],
-  providers: [NewsService, UsersService, CategoriesService],
+  providers: [NewsService],
   imports: [
     CommentsModule,
+    UsersModule,
+    CategoriesModule,
     MailModule,
-    TypeOrmModule.forFeature([NewsEntity, CategoriesEntity, UsersEntity]),
+    TypeOrmModule.forFeature([NewsEntity]),
   ],
+  exports: [NewsService],
 })
 export class NewsModule {}

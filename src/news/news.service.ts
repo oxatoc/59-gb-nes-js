@@ -1,31 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { News } from './news.interface';
 import { NewsChange } from './news-change';
 import { NewsChanges } from './news-changes';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from './news.entity';
 
 @Injectable()
 export class NewsService {
-  // private readonly news: News[] = [];
-
   constructor(
-    private configService: ConfigService,
     @InjectRepository(NewsEntity)
-    private newsRepository: Repository<NewsEntity>,
-  ) {
-    // const news: News = {
-    //   id: 1,
-    //   title: 'news1',
-    //   description: 'description1',
-    //   author: 'author1',
-    //   createdAt: '2021-01-01 00:00:00',
-    //   cover: '',
-    // };
-    // this.news.push(news);
-  }
+    private readonly newsRepository: Repository<NewsEntity>,
+  ) {}
 
   async create(news: NewsEntity) {
     return await this.newsRepository.save(news);
@@ -36,15 +21,15 @@ export class NewsService {
     if (!news) {
       return news;
     }
-    return this.newsRepository.remove(news);
+    return await this.newsRepository.remove(news);
   }
 
-  async findAll(): Promise<NewsEntity[]> {
+  async findAll() {
     return await this.newsRepository.find({});
   }
 
   async findById(id: number) {
-    return await this.newsRepository.findOne({ id });
+    return await this.newsRepository.findOneOrFail({ id });
   }
 
   async remove(id: number) {

@@ -61,55 +61,34 @@ export class CommentsController {
   async create(
     @Query() params: IdNewsDto,
     @Body() commentCreateDto: CommentCreateDto,
-    @UploadedFile() avatar: Express.Multer.File,
   ) {
-    let avatarPath = '';
-    if (avatar?.filename.length > 0) {
-      avatarPath = AVATARS_PATH + avatar.filename;
-    }
-
-    const user = await this.usersService.findById(commentCreateDto.authorId);
-    if (!user) {
-      throw new HttpException(
-        'Не существует такого автора',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const news = await this.newsService.findById(commentCreateDto.newsId);
-    if (!news) {
-      throw new HttpException(
-        'Не существует такой новости',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     const comment = new CommentsEntity();
     comment.message = commentCreateDto.comment;
-    comment.user = user;
-    comment.news = news;
+    comment.user = await this.usersService.findById(commentCreateDto.authorId);
+    comment.news = await this.newsService.findById(commentCreateDto.newsId);
 
     return await this.commentsService.create(comment);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') idComment: number,
     @Body() commentCreateDto: CommentCreateDto,
   ) {
-    return this.commentsService.update(idComment, commentCreateDto);
+    const comment = new CommentsEntity();
+    comment.message = commentCreateDto.comment;
+    comment.user = await this.usersService.findById(commentCreateDto.authorId);
+    comment.news = await this.newsService.findById(commentCreateDto.newsId);
+    return this.commentsService.update(idComment, comment);
   }
 
   @Delete(':id')
-  remove(
-    @Query('idNews') idNews: number,
-    @Param('id') idComment: string,
-  ): Promise<boolean> {
-    return this.commentsService.remove(idNews, idComment);
+  async remove(@Param('id') idComment: number) {
+    return this.commentsService.remove(idComment);
   }
 
   @Delete('all')
-  removeAll(@Query('idNews') idNews: number): Promise<boolean> {
+  async removeAll(@Query('idNews') idNews: number) {
     return this.commentsService.removeAll(idNews);
   }
 }
