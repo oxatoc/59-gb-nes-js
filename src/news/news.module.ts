@@ -17,7 +17,7 @@ import { UsersEntity } from '../users/users.entity';
     UsersModule,
     // CategoriesModule,
     MailModule,
-    TypeOrmModule.forFeature([NewsEntity, UsersEntity]),
+    TypeOrmModule.forFeature([NewsEntity]),
   ],
   exports: [NewsService],
 })
