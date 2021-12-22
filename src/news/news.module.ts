@@ -13,7 +13,7 @@ import { UsersEntity } from '../users/users.entity';
   controllers: [NewsController],
   providers: [NewsService],
   imports: [
-    // CommentsModule,
+    CommentsModule,
     UsersModule,
     CategoriesModule,
     MailModule,

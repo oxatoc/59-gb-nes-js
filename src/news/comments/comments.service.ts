@@ -3,38 +3,43 @@ import { Comment } from './comment.interface';
 import { CommentsEntity } from './comments.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NewsService } from '../news.service';
+import { NewsEntity } from '../news.entity';
 
 @Injectable()
 export class CommentsService {
-  constructor() {} // private readonly newsService: NewsService, // private readonly commentsRepository: Repository<CommentsEntity>, // @InjectRepository(CommentsEntity)
+  constructor(
+    @InjectRepository(CommentsEntity)
+    private readonly commentsRepository: Repository<CommentsEntity>,
+    @InjectRepository(NewsEntity)
+    private readonly newsRepository: Repository<NewsEntity>,
+  ) {}
 
   async create(comment: CommentsEntity) {
-    // return await this.commentsRepository.save(comment);
+    return await this.commentsRepository.save(comment);
   }
 
   async findById(id: number) {
-    // return await this.commentsRepository.find({ id });
+    return await this.commentsRepository.find({ id });
   }
 
   async findAll(idNews: number) {
-    // const news = await this.newsService.findById(idNews);
-    // if (!news) {
-    //   return null;
-    // }
-    // return await this.commentsRepository.find(news);
+    const news = await this.newsRepository.findOneOrFail({ id: idNews });
+    if (!news) {
+      return null;
+    }
+    return await this.commentsRepository.find(news);
   }
 
   async index() {
-    // return await this.commentsRepository.find({});
+    return await this.commentsRepository.find({});
   }
 
   async remove(id: number) {
-    // const comments = await this.findById(id);
-    // if (!comments) {
-    //   return null;
-    // }
-    // return await this.commentsRepository.remove(comments);
+    const comments = await this.findById(id);
+    if (!comments) {
+      return null;
+    }
+    return await this.commentsRepository.remove(comments);
   }
 
   async removeAll(idNews: number) {
@@ -46,6 +51,6 @@ export class CommentsService {
   }
 
   async update(id: number, comment: CommentsEntity) {
-    // return await this.commentsRepository.update(id, comment);
+    return await this.commentsRepository.update(id, comment);
   }
 }
