@@ -37,7 +37,8 @@ export class NewsController {
     // private readonly commentsService: CommentsService,
     // private readonly usersService: UsersService,
     // private readonly categoriesService: CategoriesService,
-    private readonly newsService: NewsService, // private readonly mailService: MailService,
+    private readonly newsService: NewsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post()
@@ -91,9 +92,9 @@ export class NewsController {
     // );
 
     const changes = await this.newsService.getChanges(id, news);
-    // if (changes) {
-    // await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
-    // }
+    if (changes) {
+      await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
+    }
 
     return await this.newsService.store(id, news);
   }
@@ -149,26 +150,4 @@ export class NewsController {
     const news = this.newsService.findAll();
     return { newsItems: news };
   }
-  //
-  // private async getUser(id: number) {
-  //   const _user = await this.usersService.findById(id);
-  //   if (!_user) {
-  //     throw new HttpException(
-  //       'Не существует такого автора',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //   return _user;
-  // }
-  //
-  // private async getCategory(id: number) {
-  //   const _category = await this.categoriesService.findById(id);
-  //   if (!_category) {
-  //     throw new HttpException(
-  //       'Не существует такой категории',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //   return _category;
-  // }
 }
