@@ -2,12 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { News } from './news.interface';
 import { NewsChange } from './news-change';
 import { NewsChanges } from './news-changes';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NewsEntity } from './news.entity';
 
 @Injectable()
 export class NewsService {
   private readonly news: News[] = [];
 
-  constructor() {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(NewsEntity)
+    private newsRepository: Repository<NewsEntity>,
+  ) {
     const news: News = {
       id: 1,
       title: 'news1',
@@ -19,11 +27,8 @@ export class NewsService {
     this.news.push(news);
   }
 
-  create(news: News): News {
-    const id = Math.round(Math.random() * 10000) + 1;
-    const newsItem = { ...news, id };
-    this.news.push(newsItem);
-    return newsItem;
+  async create(news: NewsEntity) {
+    return await this.newsRepository.save(news);
   }
 
   delete(id: number): News {
@@ -31,8 +36,20 @@ export class NewsService {
     return this.news.splice(index, 1)[0];
   }
 
-  findAll(): News[] {
-    return this.news;
+  async findAll(): Promise<NewsEntity[]> {
+    return await this.newsRepository.find({});
+  }
+
+  async findById(id: number) {
+    return await this.newsRepository.findOne({ id });
+  }
+
+  async remove(id: number) {
+    const _news = await this.findById(id);
+    if (!_news) {
+      return null;
+    }
+    return await this.newsRepository.remove(_news);
   }
 
   async findByIndex(idNews: number): Promise<News | null> {

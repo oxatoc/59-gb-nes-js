@@ -4,26 +4,31 @@ import { MailController } from './mail.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { SMTP_HOST, SMTP_PASSWORD, SMTP_USER } from '../../credentials';
-
-const transport = `smtps://${SMTP_USER}:${SMTP_PASSWORD}@${SMTP_HOST}`;
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [MailService],
   controllers: [MailController],
   imports: [
-    MailerModule.forRoot({
-      transport: transport,
-      defaults: {
-        from: `"NestJS робот" <${SMTP_USER}>`,
-      },
-      template: {
-        dir: join(__dirname, '../../mail/templates'),
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
+    MailerModule.forRootAsync({
+      useFactory: async (config: ConfigService) => ({
+        transport: `smtps://${config.get<string>(
+          'SMTP_USER',
+        )}:${config.get<string>('SMTP_PASSWORD')}@${config.get<string>(
+          'SMTP_HOST',
+        )}`,
+        defaults: {
+          from: `"NestJS робот" <${config.get<string>('SMTP_USER')}>`,
         },
-      },
+        template: {
+          dir: join(__dirname, '../../src/mail/templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   exports: [MailService],

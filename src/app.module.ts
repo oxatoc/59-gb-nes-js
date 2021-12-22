@@ -7,7 +7,14 @@ import { NewsModule } from './news/news.module';
 import { CalcModule } from './calc/calc.module';
 import { LoggerMiddleware } from './middlwares/logger.middleware';
 import { MailModule } from './mail/mail.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { NewsEntity } from './news/news.entity';
+import { UsersEntity } from './users/users.entity';
+import { CommentsEntity } from './news/comments/comments.entity';
+import { UsersModule } from './users/users.module';
+import { CategoriesModule } from './categories/categories.module';
+import { CategoriesEntity } from './categories/categories.entity';
 
 @Module({
   imports: [
@@ -15,7 +22,22 @@ import { ConfigModule } from '@nestjs/config';
     CalcModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
     MailModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      useFactory: async (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST'),
+        port: config.get('DB_PORT'),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_DATABASE'),
+        entities: [NewsEntity, UsersEntity, CategoriesEntity, CommentsEntity],
+        synchronize: config.get('DB_SYNCHRONIZE'),
+      }),
+      inject: [ConfigService],
+    }),
+    UsersModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

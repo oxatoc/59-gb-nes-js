@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsNotEmpty,
+  IsNumberString,
   IsString,
   ValidateIf,
 } from 'class-validator';
@@ -22,6 +23,14 @@ export class NewsCreateDto implements News {
   @ValidateIf((o) => o.cover)
   @IsString()
   cover = '';
+
+  @IsNotEmpty()
+  @IsNumberString()
+  authorId = 0;
+
+  @IsNotEmpty()
+  @IsNumberString()
+  categoryId = 0;
 
   @IsNotEmpty()
   @IsDateString()
