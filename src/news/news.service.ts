@@ -1,47 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { News } from './news.interface';
 import { NewsChange } from './news-change';
 import { NewsChanges } from './news-changes';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from './news.entity';
+import { UsersEntity } from '../users/users.entity';
 
 @Injectable()
 export class NewsService {
-  private readonly news: News[] = [];
-
   constructor(
-    private configService: ConfigService,
     @InjectRepository(NewsEntity)
-    private newsRepository: Repository<NewsEntity>,
-  ) {
-    const news: News = {
-      id: 1,
-      title: 'news1',
-      description: 'description1',
-      author: 'author1',
-      createdAt: '2021-01-01 00:00:00',
-      cover: '',
-    };
-    this.news.push(news);
-  }
+    private readonly newsRepository: Repository<NewsEntity>,
+  ) {}
 
   async create(news: NewsEntity) {
     return await this.newsRepository.save(news);
   }
 
-  delete(id: number): News {
-    const index = this.news.findIndex((news) => news.id === id);
-    return this.news.splice(index, 1)[0];
+  async delete(news: NewsEntity) {
+    return await this.newsRepository.remove(news);
   }
 
-  async findAll(): Promise<NewsEntity[]> {
+  async findAll() {
     return await this.newsRepository.find({});
   }
 
   async findById(id: number) {
-    return await this.newsRepository.findOne({ id });
+    return await this.newsRepository.findOneOrFail({ id });
+  }
+
+  async findByUser(user: UsersEntity) {
+    return await this.newsRepository.find({ user });
   }
 
   async remove(id: number) {
@@ -52,27 +41,12 @@ export class NewsService {
     return await this.newsRepository.remove(_news);
   }
 
-  async findByIndex(idNews: number): Promise<News | null> {
-    const found = this.news.find((item) => {
-      return item.id === +idNews;
-    });
-
-    console.assert(typeof found !== 'undefined', '[findByIndex] Invalid');
-    if (typeof found !== 'undefined') {
-      return found;
-    }
-
-    return null;
-  }
-
-  async getChanges(id: number, news: News): Promise<NewsChanges | null> {
-    const previousNews: { [index: string]: any } = (await this.findByIndex(
-      id,
-    )) as News;
-
-    if (!previousNews) {
+  async getChanges(id: number, news: NewsEntity) {
+    const storedNews = await this.findById(id);
+    if (!storedNews) {
       return null;
     }
+    const previousNews: { [index: string]: any } = storedNews;
 
     const actualNews: { [index: string]: any } = news;
 
@@ -104,9 +78,7 @@ export class NewsService {
     return null;
   }
 
-  store(values: News): News {
-    const index = this.news.findIndex((item) => item.id === values.id);
-    this.news[index] = { ...this.news[index], ...values };
-    return this.news[index];
+  async store(id: number, news: NewsEntity) {
+    return await this.newsRepository.update(id, news);
   }
 }
