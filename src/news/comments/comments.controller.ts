@@ -13,19 +13,23 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { Comment } from './comment.interface';
 import { CommentCreateDto } from '../../dtos/comment-create-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { IdNewsDto } from '../../dtos/id-news-dto';
 import { fileExtensionCheck } from '../../utils/file-extension-check';
 import { destinationPathComment } from '../../utils/destination-path-comment';
 import { customFileName } from '../../utils/custom-file-name';
-import { AVATARS_PATH } from '../../types/types';
+import { CommentsEntity } from './comments.entity';
+import { UsersService } from '../../users/users.service';
+import { NewsService } from '../news.service';
 
 @Controller('news-comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly usersService: UsersService,
+    private readonly newsService: NewsService,
+  ) {}
 
   @Get()
   @Render('comments-index')
@@ -35,8 +39,9 @@ export class CommentsController {
   }
 
   @Get('all')
-  getAll(@Query('idNews') idNews: number) {
-    return this.commentsService.findAll(idNews);
+  async getAll(@Query('idNews') idNews: number) {
+    const news = await this.newsService.findById(idNews);
+    return this.commentsService.findAll(news);
   }
 
   @Post()
@@ -49,39 +54,33 @@ export class CommentsController {
       fileFilter: fileExtensionCheck,
     }),
   )
-  create(
-    @Query() params: IdNewsDto,
-    @Body() commentCreateDto: CommentCreateDto,
-    @UploadedFile() avatar: Express.Multer.File,
-  ): Promise<Comment> {
-    let avatarPath = '';
-    if (avatar?.filename.length > 0) {
-      avatarPath = AVATARS_PATH + avatar.filename;
-    }
-    return this.commentsService.create(params.idNews, {
-      ...commentCreateDto,
-      ...{ avatar: avatarPath },
-    });
+  async create(@Body() commentCreateDto: CommentCreateDto) {
+    const comment = new CommentsEntity();
+    comment.message = commentCreateDto.message;
+    comment.user = await this.usersService.findById(commentCreateDto.authorId);
+    comment.news = await this.newsService.findById(commentCreateDto.newsId);
+
+    return await this.commentsService.create(comment);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') idComment: string,
+  async update(
+    @Param('id') idComment: number,
     @Body() commentCreateDto: CommentCreateDto,
   ) {
-    return this.commentsService.update(idComment, commentCreateDto);
+    let comment = await this.commentsService.findById(idComment);
+    comment = { ...comment, ...commentCreateDto };
+    return this.commentsService.update(idComment, comment);
   }
 
   @Delete(':id')
-  remove(
-    @Query('idNews') idNews: number,
-    @Param('id') idComment: string,
-  ): Promise<boolean> {
-    return this.commentsService.remove(idNews, idComment);
+  async remove(@Param('id') idComment: number) {
+    return this.commentsService.remove(idComment);
   }
 
   @Delete('all')
-  removeAll(@Query('idNews') idNews: number): Promise<boolean> {
-    return this.commentsService.removeAll(idNews);
+  async removeAll(@Query('idNews') idNews: number) {
+    const news = await this.newsService.findById(idNews);
+    return this.commentsService.removeAll(news);
   }
 }

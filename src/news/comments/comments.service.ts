@@ -1,66 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { NewsComments } from './news-comments.interface';
 import { Comment } from './comment.interface';
+import { CommentsEntity } from './comments.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NewsEntity } from '../news.entity';
 
 @Injectable()
 export class CommentsService {
-  private readonly comments: NewsComments = {};
+  constructor(
+    @InjectRepository(CommentsEntity)
+    private readonly commentsRepository: Repository<CommentsEntity>,
+  ) {}
 
-  async create(idNews: number, comment: Comment): Promise<Comment> {
-    if (!this.comments?.[idNews]) {
-      this.comments[idNews] = [];
-    }
-
-    const commentObj: Comment = { ...comment, ...{ id: uuidv4() } };
-
-    this.comments[idNews].push(commentObj);
-
-    return commentObj;
+  async create(comment: CommentsEntity) {
+    return await this.commentsRepository.save(comment);
   }
 
-  async findAll(idNews: number): Promise<Comment[] | undefined> {
-    return this.comments?.[idNews];
+  async findById(id: number) {
+    return await this.commentsRepository.findOneOrFail({ id });
+  }
+
+  async findAll(news: NewsEntity) {
+    return await this.commentsRepository.find(news);
   }
 
   async index() {
-    let comments: Comment[] = [];
-    for (const idNews in this.comments) {
-      const newsComments = this.comments[idNews];
-      comments = [...comments, ...newsComments];
-    }
-    return comments;
+    return await this.commentsRepository.find({});
   }
 
-  async remove(idNews: number, idComment: string): Promise<boolean> {
-    const index = this.comments?.[idNews].findIndex((x) => x.id === idComment);
-    if (index !== -1) {
-      this.comments[idNews].splice(index, 1);
-      return true;
-    }
-    return true;
+  async remove(id: number) {
+    const comments = await this.findById(id);
+    return await this.commentsRepository.remove(comments);
   }
 
-  async removeAll(idNews: number): Promise<boolean> {
-    return delete this.comments?.[idNews];
+  async removeAll(news: NewsEntity) {
+    const comments = await this.findAll(news);
+    return await this.commentsRepository.remove(comments);
   }
 
-  async update(idComment: string, comment: Comment): Promise<Comment | null> {
-    const newsKeys: string[] = Object.keys(this.comments);
-    let index = -1;
-
-    let iKey = 0;
-    while (iKey < newsKeys.length) {
-      const key = +newsKeys[iKey++];
-      const comments = this.comments[key];
-      index = comments.findIndex((item) => item.id === idComment);
-      if (index >= 0) {
-        let commentItem = this.comments[key][index];
-        commentItem = { ...commentItem, ...comment };
-        this.comments[key][index] = commentItem;
-        return commentItem;
-      }
-    }
-    return null;
+  async update(id: number, comment: CommentsEntity) {
+    return await this.commentsRepository.update(id, comment);
   }
 }

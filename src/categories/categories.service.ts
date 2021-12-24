@@ -14,6 +14,6 @@ export class CategoriesService {
   }
 
   async findById(id: number) {
-    return await this.categoriesRepository.findOne({ id });
+    return await this.categoriesRepository.findOneOrFail({ id });
   }
 }

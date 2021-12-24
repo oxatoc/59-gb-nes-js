@@ -1,5 +1,4 @@
 import {
-  IsDateString,
   IsNotEmpty,
   IsNumberString,
   IsString,
@@ -16,23 +15,15 @@ export class NewsCreateDto implements News {
   @IsString()
   description = '';
 
-  @ValidateIf((o) => o.author)
-  @IsString()
-  author = '';
-
   @ValidateIf((o) => o.cover)
   @IsString()
   cover = '';
 
-  @IsNotEmpty()
+  @ValidateIf((o) => o.authorId)
   @IsNumberString()
   authorId = 0;
 
-  @IsNotEmpty()
+  @ValidateIf((o) => o.categoryId)
   @IsNumberString()
   categoryId = 0;
-
-  @IsNotEmpty()
-  @IsDateString()
-  createdAt = '';
 }
