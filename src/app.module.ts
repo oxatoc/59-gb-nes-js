@@ -15,6 +15,7 @@ import { CommentsEntity } from './news/comments/comments.entity';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CategoriesEntity } from './categories/categories.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CategoriesEntity } from './categories/categories.entity';
     }),
     UsersModule,
     CategoriesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

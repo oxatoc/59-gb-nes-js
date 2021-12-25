@@ -8,8 +8,6 @@ import {
   Post,
   Query,
   Render,
-  UploadedFile,
-  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';

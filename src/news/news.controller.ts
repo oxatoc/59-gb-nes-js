@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Render,
   UploadedFile,
   UseInterceptors,
@@ -15,7 +14,7 @@ import { NewsService } from './news.service';
 import { CommentsService } from './comments/comments.service';
 import { NewsIdDto } from '../dtos/news-id.dto';
 import { NewsCreateDto } from '../dtos/news-create.dto';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { LoggingInterceptor } from '../interceptors/logging.interceptor';
 import { fileExtensionCheck } from '../utils/file-extension-check';
