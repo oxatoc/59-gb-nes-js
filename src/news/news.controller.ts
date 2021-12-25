@@ -3,18 +3,15 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Render,
   UploadedFile,
-  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
-import { News } from './news.interface';
 import { CommentsService } from './comments/comments.service';
 import { NewsIdDto } from '../dtos/news-id.dto';
 import { NewsCreateDto } from '../dtos/news-create.dto';
@@ -34,11 +31,11 @@ import { CategoriesService } from '../categories/categories.service';
 @UseInterceptors(LoggingInterceptor)
 export class NewsController {
   constructor(
-    private readonly newsService: NewsService,
     private readonly commentsService: CommentsService,
-    private readonly mailService: MailService,
     private readonly usersService: UsersService,
     private readonly categoriesService: CategoriesService,
+    private readonly newsService: NewsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Post()
@@ -52,66 +49,53 @@ export class NewsController {
     }),
   )
   async create(
-    @Body() news: NewsCreateDto,
+    @Body() newsCreateDto: NewsCreateDto,
     @UploadedFile() cover: Express.Multer.File,
-  ): Promise<NewsEntity> {
-    const _user = await this.usersService.findById(news.authorId);
-    if (!_user) {
-      throw new HttpException(
-        'Не существует такого автора',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const _category = await this.categoriesService.findById(news.categoryId);
-    if (!_category) {
-      throw new HttpException(
-        'Не существует такой категории',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  ) {
     const _newsEntity = new NewsEntity();
     if (cover?.filename?.length > 0) {
       _newsEntity.cover = NEWS_PATH + cover.filename;
     }
-    _newsEntity.title = news.title;
-    _newsEntity.description = news.description;
-    _newsEntity.user = _user;
-    _newsEntity.category = _category;
+    _newsEntity.title = newsCreateDto.title;
+    _newsEntity.description = newsCreateDto.description;
+
+    _newsEntity.user = await this.usersService.findById(newsCreateDto.authorId);
+    _newsEntity.category = await this.categoriesService.findById(
+      newsCreateDto.categoryId,
+    );
 
     const _news = await this.newsService.create(_newsEntity);
     await this.mailService.sendNewNewsForAdmins(['regs@rigtaf.ru'], _news);
     return _news;
   }
 
-  @Put(':id')
-  async update(@Param('id') id: number, @Body() news: News) {
-    const newsItem = this.newsService.findByIndex(id);
-
-    if (!newsItem) {
-      throw new HttpException(
-        `error: news id = ${id} not found`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @Patch(':id')
+  async update(@Param('id') id: number, @Body() newsCreateDto: NewsCreateDto) {
+    let news = await this.newsService.findById(id);
+    news = { ...news, ...newsCreateDto };
 
     const changes = await this.newsService.getChanges(id, news);
     if (changes) {
       await this.mailService.sendChanges(['regs@rigtaf.ru'], changes);
     }
 
-    return this.newsService.store(news);
+    return await this.newsService.store(id, news);
   }
 
   @Get('all')
-  async getAll(): Promise<NewsEntity[]> {
+  async getAll() {
     return await this.newsService.findAll();
   }
 
+  @Get('users/:id')
+  async getByUser(@Param('id') id: number) {
+    const user = await this.usersService.findById(id);
+    return await this.newsService.findByUser(user);
+  }
+
   @Get(':id')
-  async getById(@Param() params: NewsIdDto): Promise<News | null> {
-    return this.newsService.findByIndex(params.id);
+  async getById(@Param() params: NewsIdDto) {
+    return await this.newsService.findById(params.id);
   }
 
   @Get(':id/comments/create')
@@ -123,29 +107,19 @@ export class NewsController {
   @Get(':id/detail')
   @Render('news-details')
   async getDetailById(@Param('id') idNews: number) {
-    return Promise.all([
-      this.newsService.findByIndex(idNews),
-      this.commentsService.findAll(idNews),
-    ]).then((values) => {
-      const newsItem = values[0];
-      const newsComments = values[1];
-      return { news: newsItem, comments: newsComments };
-    });
+    const news = await this.newsService.findById(idNews);
+    const comments = await this.commentsService.findAll(news);
+    return { news, comments };
   }
 
   @Delete(':id')
-  async delete(@Param() params: NewsIdDto) {
-    const newsItem = this.newsService.findByIndex(params.id);
-    if (!newsItem) {
-      throw new HttpException(
-        `error: news id = ${params.id} not found`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    return (
-      this.newsService.delete(params.id) &&
-      this.commentsService.removeAll(params.id)
-    );
+  async delete(@Param('id') newsId: number) {
+    const news = await this.newsService.findById(newsId);
+
+    const comments = await this.commentsService.removeAll(news);
+    await this.newsService.delete(news);
+
+    return { news, comments };
   }
 
   @Get()
