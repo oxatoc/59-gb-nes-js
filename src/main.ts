@@ -6,10 +6,12 @@ import * as hbs from 'hbs';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
-const staticAssets = join(__dirname, '../../public');
-const baseViewsDir = join(__dirname, '../../views');
-const layoutsDir = join(__dirname, '../../views/layouts');
-const partials = join(__dirname, '../../views/partials');
+const root = __dirname;
+
+const staticAssets = join(root, '../public');
+const baseViewsDir = join(root, '../views');
+const layoutsDir = join(root, '../views/layouts');
+const partials = join(root, '../views/partials');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

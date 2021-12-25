@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './users.entity';
 import { Repository } from 'typeorm';
@@ -17,18 +22,7 @@ export class UsersService {
     userEntity.firstName = user.firstName;
     userEntity.lastName = user.lastName;
     userEntity.email = user.email;
-
-    switch (user.role) {
-      case 'user':
-        userEntity.roles = Role.User;
-        break;
-      case 'admin':
-        userEntity.roles = Role.Admin;
-        break;
-      case 'moderator':
-        userEntity.roles = Role.Moderator;
-        break;
-    }
+    userEntity.roles = UsersService.getRole(user.roles);
     userEntity.password = await hash(user.password);
     return await this.usersRepository.save(userEntity);
   }
@@ -48,5 +42,30 @@ export class UsersService {
     }
     _user.roles = Role.Moderator;
     return this.usersRepository.save(_user);
+  }
+  async store(id: number, userCreateDto: UserCreateDto) {
+    let user = await this.usersRepository.findOneOrFail({ id });
+    const { password, roles, ...rest } = userCreateDto;
+    user = { ...user, ...rest };
+    if (password) {
+      user.password = await hash(password);
+    }
+    if (roles) {
+      user.roles = UsersService.getRole(roles);
+    }
+    return await this.usersRepository.update(id, user);
+  }
+
+  private static getRole(roleName: string) {
+    switch (roleName) {
+      case 'user':
+        return Role.User;
+      case 'admin':
+        return Role.Admin;
+      case 'moderator':
+        return Role.Moderator;
+      default:
+        throw new HttpException('role not found', HttpStatus.BAD_REQUEST);
+    }
   }
 }

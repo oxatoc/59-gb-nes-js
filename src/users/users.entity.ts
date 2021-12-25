@@ -26,9 +26,6 @@ export class UsersEntity {
   email = '';
 
   @Column('text')
-  role = '';
-
-  @Column('text')
   password = '';
 
   @Column('text')
