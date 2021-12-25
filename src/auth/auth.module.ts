@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { LocalStrategy } from './local.strategy';
@@ -17,7 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async (config: ConfigService) => ({

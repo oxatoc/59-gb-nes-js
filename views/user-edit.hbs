@@ -1,0 +1,47 @@
+<h2>Редактирование профиля</h2>
+<form action="#" id="edit-form" name="editForm">
+</form>
+<button type="button" class="btn btn-primary" id="submit">Отправить</button>
+<script>
+  const idUser={{idUser}}
+</script>
+
+
+
+<script>
+  document.querySelector('#submit')
+    .addEventListener('click', event => {
+      const token = window.localStorage.getItem('nest_access_token');
+      const form = document.querySelector('#edit-form');
+      const formData = new FormData(form);
+      const obj = {}
+      for (const key of formData.keys()) {
+        obj[key] = formData.get(key)
+      }
+      fetch(`/users/${idUser}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(obj)
+      })
+        .then(() => window.location = `/users/${idUser}/edit`);
+    })
+
+  document.addEventListener('DOMContentLoaded', event => {
+    const token = window.localStorage.getItem('nest_access_token')
+    fetch(`/users/web-api/${idUser}/edit`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      document.querySelector('#edit-form')
+      .insertAdjacentHTML('beforeend', html)
+    })
+  })
+
+</script>

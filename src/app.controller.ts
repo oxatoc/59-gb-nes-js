@@ -26,7 +26,7 @@ export class AppController {
 
   @Get()
   @Render('index')
-  getHello() {
+  async getHello() {
     return { message: 'Hello word!' };
   }
 }

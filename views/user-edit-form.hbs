@@ -1,0 +1,12 @@
+{{#if user}}
+  <div class="mb-3">
+    <label for="first-name">Имя</label>
+    <input type="text" id="first-name" class="form-control" name="firstName" value="{{user.firstName}}">
+  </div>
+  <div class="mb-3">
+    <label for="first-name">Фамилия</label>
+    <input type="text" id="first-name" class="form-control" name="lastName" value="{{user.lastName}}">
+  </div>
+{{else}}
+  <h1>Пользователь не найден</h1>
+{{/if}}
