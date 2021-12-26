@@ -50,6 +50,12 @@ export class CommentsService {
   }
 
   async update(id: number, comment: CommentsEntity) {
-    return await this.commentsRepository.update(id, comment);
+    const result = await this.commentsRepository.update(id, comment);
+    const newComment = await this.findById(id);
+    this.eventEmitter.emit('comment.update', {
+      commentId: newComment.id,
+      newsId: newComment.news.id,
+    });
+    return result;
   }
 }

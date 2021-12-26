@@ -63,6 +63,12 @@ export class SocketCommentsGateway
     this.server.to(newsId.toString()).emit('removeComment', { id: commentId });
   }
 
+  @OnEvent('comment.update')
+  handleUpdateCommentEvent(payload: RemovedComment) {
+    const { commentId, newsId } = payload;
+    this.server.to(newsId.toString()).emit('updateComment', { id: commentId });
+  }
+
   // событие срабатывает после инициализации сервера
   afterInit(server: Server) {
     this.logger.log('Init websocket server');
