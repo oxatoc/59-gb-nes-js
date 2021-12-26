@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { RolesGuard } from './role/roles.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { WsRolesGuard } from './role/ws-roles.guard';
 
 @Module({
   providers: [
@@ -15,6 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
     LocalStrategy,
     JwtStrategy,
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: WsRolesGuard },
   ],
   imports: [
     forwardRef(() => UsersModule),
