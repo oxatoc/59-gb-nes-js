@@ -20,7 +20,7 @@ export class CommentsService {
   async findById(id: number) {
     return await this.commentsRepository.findOneOrFail(
       { id },
-      { relations: ['news'] },
+      { relations: ['news', 'user'] },
     );
   }
 
@@ -53,8 +53,8 @@ export class CommentsService {
     const result = await this.commentsRepository.update(id, comment);
     const newComment = await this.findById(id);
     this.eventEmitter.emit('comment.update', {
-      commentId: newComment.id,
       newsId: newComment.news.id,
+      comment: newComment,
     });
     return result;
   }

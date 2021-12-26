@@ -44,6 +44,16 @@ class Comments extends React.Component {
       const { id } = payload;
       this.removeComment(id);
     });
+    this.socket.on('updateComment', (payload) => {
+      const { comment } = payload;
+      const messages = this.state.messages;
+      console.log('comment', comment, messages);
+      const index = messages.findIndex((message) => message.id === comment.id);
+      if (index >= 0) {
+        messages[index] = comment;
+        this.setState(messages);
+      }
+    });
   }
 
   removeComment = (commentId) => {
@@ -97,7 +107,7 @@ class Comments extends React.Component {
     return name;
   };
   isCurrentUser = (profile) => {
-    if (!this.state.profile) {
+    if (!this.state.profile || !profile) {
       return false;
     }
     return this.state.profile.id === profile.id;

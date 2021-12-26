@@ -19,6 +19,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 export type Comment = { idNews: number; name: string; message: string };
 export type RemovedComment = { commentId: number; newsId: number };
+export type UpdatedComment = { newsId: number; comment: CommentsEntity };
 
 @WebSocketGateway(3001, {
   cors: {
@@ -64,9 +65,9 @@ export class SocketCommentsGateway
   }
 
   @OnEvent('comment.update')
-  handleUpdateCommentEvent(payload: RemovedComment) {
-    const { commentId, newsId } = payload;
-    this.server.to(newsId.toString()).emit('updateComment', { id: commentId });
+  handleUpdateCommentEvent(payload: UpdatedComment) {
+    const { comment, newsId } = payload;
+    this.server.to(newsId.toString()).emit('updateComment', { comment });
   }
 
   // событие срабатывает после инициализации сервера
