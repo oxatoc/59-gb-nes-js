@@ -25,7 +25,10 @@ export class CommentsService {
   }
 
   async findAll(news: NewsEntity) {
-    return await this.commentsRepository.find({ news });
+    return await this.commentsRepository.find({
+      where: { news },
+      relations: ['user'],
+    });
   }
 
   async index() {

@@ -7,13 +7,13 @@ class Comments extends React.Component {
     super(props);
     this.state = {
       messages: [],
-      name: 'dp',
       message: '',
+      profile: null,
     };
 
     // Парсим URL, извлекаем id новости
     this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
-    const bearerToken = localStorage.getItem('nest_access_token');
+    this.bearerToken = localStorage.getItem('nest_access_token');
     // Указываем адрес сокет сервера
     this.socket = io('http://localhost:3001', {
       query: {
@@ -22,7 +22,7 @@ class Comments extends React.Component {
       transportOptions: {
         polling: {
           extraHeaders: {
-            Authorization: 'Bearer ' + bearerToken,
+            Authorization: 'Bearer ' + this.bearerToken,
           },
         },
       },
@@ -31,6 +31,7 @@ class Comments extends React.Component {
 
   componentDidMount() {
     this.getAllComments();
+    this.getProfile();
     // Указываем комнату
     this.socket.emit('create', this.idNews.toString());
     // Подписываемся на событие появления нового комментария
@@ -45,6 +46,20 @@ class Comments extends React.Component {
       this.setState({ messages });
     });
   }
+
+  getProfile = async () => {
+    const response = await fetch('/profile', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.bearerToken}`,
+      },
+    });
+    if (response.ok) {
+      const profile = await response.json();
+      console.log('profile', profile);
+      this.setState({ profile });
+    }
+  };
 
   getAllComments = async () => {
     const response = await fetch(`/news-comments/all?idNews=${this.idNews}`, {
@@ -69,6 +84,21 @@ class Comments extends React.Component {
       message: this.state.message,
     });
   };
+  getName = (profile) => {
+    let name = '';
+    if (profile) {
+      name += profile.firstName;
+      name += ' ';
+      name += profile.lastName;
+    }
+    return name;
+  };
+  isCurrentUser = (profile) => {
+    if (!this.state.profile) {
+      return false;
+    }
+    return this.state.profile.id === profile.id;
+  };
 
   render() {
     return (
@@ -77,8 +107,16 @@ class Comments extends React.Component {
           return (
             <div key={message + index} className="card mb-1">
               <div className="card-body">
-                <strong>{message.name}</strong>
+                <strong>{this.getName(message.user)}</strong>
                 <div>{message.message}</div>
+                {this.isCurrentUser(message.user) && (
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    type="button"
+                  >
+                    Удалить
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -87,7 +125,7 @@ class Comments extends React.Component {
           <div className="form-floating mb-3">
             <input
               className="form-control"
-              value={this.state.name}
+              value={this.getName(this.state.profile)}
               onChange={this.onChange}
               name="name"
               placeholder="Имя"
