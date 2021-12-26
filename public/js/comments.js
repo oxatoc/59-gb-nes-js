@@ -113,14 +113,7 @@ class Comments extends React.Component {
   };
 
   handleDelete = async (commentId) => {
-    await fetch(`/news-comments/${commentId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.bearerToken}`,
-      },
-    });
-    this.removeComment(commentId);
+    this.socket.emit('removeComment', commentId);
   };
 
   render() {

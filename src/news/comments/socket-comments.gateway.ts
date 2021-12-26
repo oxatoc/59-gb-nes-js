@@ -58,6 +58,11 @@ export class SocketCommentsGateway
     this.server.to(idNews.toString()).emit('newComment', _comment);
   }
 
+  @SubscribeMessage('removeComment')
+  async handleRemove(client: Socket, idComment: number) {
+    await this.commentsService.remove(idComment);
+  }
+
   @OnEvent('comment.remove')
   handleRemoveCommentEvent(payload: RemovedComment) {
     const { commentId, newsId } = payload;
