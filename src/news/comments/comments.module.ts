@@ -7,12 +7,15 @@ import { NewsEntity } from '../news.entity';
 import { UsersModule } from '../../users/users.module';
 import { UsersEntity } from '../../users/users.entity';
 import { NewsModule } from '../news.module';
+import { SocketCommentsGateway } from './socket-comments.gateway';
+import { AuthModule } from '../../auth/auth.module';
 
 @Module({
-  providers: [CommentsService],
+  providers: [CommentsService, SocketCommentsGateway],
   controllers: [CommentsController],
   exports: [CommentsService],
   imports: [
+    AuthModule,
     UsersModule,
     forwardRef(() => NewsModule),
     TypeOrmModule.forFeature([CommentsEntity, NewsEntity, UsersEntity]),

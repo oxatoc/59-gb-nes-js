@@ -7,11 +7,12 @@
       <h6 class="card-subtitle mb-2 text-muted">Дата создания: {{news.createdAt}}</h6>
       <p class="card-text">{{news.description}}</p>
     </div>
-    {{#if comments}}
-      {{#each comments}}
-        {{> comments-item comment=this}}
-      {{/each}}
-    {{/if}}
-    <a href='/news/{{news.id}}/comments/create' target='_blank'>Добавить комментарий</a>
+    <h2 class="fw-bold 1h-1 mb-3">Комментарии</h2>
+    <div id="app"></div>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+    <script src="/js/comments.js" type="text/babel"></script>
   </div>
 </div>
