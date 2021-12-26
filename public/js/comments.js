@@ -33,7 +33,7 @@ class Comments extends React.Component {
     this.getAllComments();
     this.getProfile();
     // Указываем комнату
-    this.socket.emit('create', this.idNews.toString());
+    // this.socket.emit('create', this.idNews.toString());
     // Подписываемся на событие появления нового комментария
     this.socket.on('newComment', (message) => {
       const messages = this.state.messages;
@@ -47,7 +47,6 @@ class Comments extends React.Component {
     this.socket.on('updateComment', (payload) => {
       const { comment } = payload;
       const messages = this.state.messages;
-      console.log('comment', comment, messages);
       const index = messages.findIndex((message) => message.id === comment.id);
       if (index >= 0) {
         messages[index] = comment;
