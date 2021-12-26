@@ -15,7 +15,7 @@ import { AuthModule } from '../../auth/auth.module';
   controllers: [CommentsController],
   exports: [CommentsService],
   imports: [
-    AuthModule,
+    forwardRef(() => AuthModule),
     UsersModule,
     forwardRef(() => NewsModule),
     TypeOrmModule.forFeature([CommentsEntity, NewsEntity, UsersEntity]),

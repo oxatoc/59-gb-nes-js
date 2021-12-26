@@ -61,10 +61,9 @@ export class SocketCommentsGateway
   }
 
   @SubscribeMessage('removeComment')
-  @WsRoles(Role.Admin) //WsRolesGuard не вызывает
-  // @UseGuards(WsRolesGuard) // WsRolesGuard вызывает
-  async handleRemove(client: Socket, idComment: number) {
-    await this.commentsService.remove(idComment);
+  @WsRoles(Role.Admin)
+  async handleRemove(client: Socket, payload: { idComment: number }) {
+    await this.commentsService.remove(payload.idComment);
   }
 
   @OnEvent('comment.remove')

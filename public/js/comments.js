@@ -112,8 +112,10 @@ class Comments extends React.Component {
     return this.state.profile.id === profile.id;
   };
 
-  handleDelete = async (commentId) => {
-    this.socket.emit('removeComment', commentId);
+  handleDelete = async (idComment) => {
+    this.socket.emit('removeComment', {
+      idComment,
+    });
   };
 
   render() {
