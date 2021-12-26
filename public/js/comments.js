@@ -42,10 +42,14 @@ class Comments extends React.Component {
     });
     this.socket.on('removeComment', (payload) => {
       const { id } = payload;
-      const messages = this.state.messages.filter((c) => c.id !== +id);
-      this.setState({ messages });
+      this.removeComment(id);
     });
   }
+
+  removeComment = (commentId) => {
+    const messages = this.state.messages.filter((c) => c.id !== +commentId);
+    this.setState({ messages });
+  };
 
   getProfile = async () => {
     const response = await fetch('/profile', {
@@ -100,6 +104,17 @@ class Comments extends React.Component {
     return this.state.profile.id === profile.id;
   };
 
+  handleDelete = async (commentId) => {
+    await fetch(`/news-comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.bearerToken}`,
+      },
+    });
+    this.removeComment(commentId);
+  };
+
   render() {
     return (
       <div>
@@ -113,6 +128,7 @@ class Comments extends React.Component {
                   <button
                     className="btn btn-outline-secondary btn-sm"
                     type="button"
+                    onClick={() => this.handleDelete(message.id)}
                   >
                     Удалить
                   </button>
