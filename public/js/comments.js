@@ -60,7 +60,6 @@ class Comments extends React.Component {
     });
     if (response.ok) {
       const profile = await response.json();
-      console.log('profile', profile);
       this.setState({ profile });
     }
   };
