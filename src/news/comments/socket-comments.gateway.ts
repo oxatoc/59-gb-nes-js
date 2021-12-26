@@ -15,9 +15,7 @@ import { UsersService } from '../../users/users.service';
 import { NewsService } from '../news.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Role } from '../../auth/role/role.enum';
-import { Roles } from '../../auth/role/roles.decorator';
-import { WsRolesGuard } from '../../auth/role/ws-roles.guard';
-import { WsRoles } from '../../auth/role/ws-roles.decorator';
+import { WsRolesOrUser } from '../../auth/role/ws-roles.decorator';
 
 export type Comment = { idNews: number; name: string; message: string };
 export type RemovedComment = { commentId: number; newsId: number };
@@ -61,7 +59,7 @@ export class SocketCommentsGateway
   }
 
   @SubscribeMessage('removeComment')
-  @WsRoles(Role.Admin)
+  @WsRolesOrUser(Role.Admin)
   async handleRemove(client: Socket, payload: { idComment: number }) {
     await this.commentsService.remove(payload.idComment);
   }
