@@ -92,10 +92,18 @@ class Comments extends React.Component {
     // Отправляем на сервер событие добавления комментария
     this.socket.emit('addComment', {
       idNews: this.idNews,
-      name: this.state.name,
+      // name: this.state.name,
       message: this.state.message,
     });
   };
+
+  updateMessage = (idComment, message) => {
+    this.socket.emit('updateComment', {
+      idComment,
+      message,
+    });
+  };
+
   getName = (profile) => {
     let name = '';
     if (profile) {

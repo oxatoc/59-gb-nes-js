@@ -17,7 +17,8 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Role } from '../../auth/role/role.enum';
 import { WsRolesOrUser } from '../../auth/role/ws-roles.decorator';
 
-export type Comment = { idNews: number; name: string; message: string };
+// export type Comment = { idNews: number; name: string; message: string };
+export type Comment = { idNews: number; message: string };
 export type RemovedComment = { commentId: number; newsId: number };
 export type UpdatedComment = { newsId: number; comment: CommentsEntity };
 
@@ -58,6 +59,16 @@ export class SocketCommentsGateway
     this.server.to(idNews.toString()).emit('newComment', _comment);
   }
 
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('updateComment')
+  async handleUpdate(
+    client: Socket,
+    payload: { idComment: number; message: string },
+  ) {
+    console.log('payload', payload.idComment, payload.message);
+  }
+
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('removeComment')
   @WsRolesOrUser(Role.Admin)
   async handleRemove(client: Socket, payload: { idComment: number }) {
