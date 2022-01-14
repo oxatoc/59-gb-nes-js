@@ -9,6 +9,7 @@ class Comments extends React.Component {
       messages: [],
       message: '',
       profile: null,
+      updatedMessage: '',
     };
 
     // Парсим URL, извлекаем id новости
@@ -97,11 +98,13 @@ class Comments extends React.Component {
     });
   };
 
-  updateMessage = (idComment, message) => {
-    this.socket.emit('updateComment', {
-      idComment,
-      message,
-    });
+  updateMessage = (event) => {
+    const idComment = event.target.dataset.id;
+    console.log('input', idComment, event.target.value);
+    // this.socket.emit('updateComment', {
+    //   idComment,
+    //   message: event.target.value,
+    // });
   };
 
   getName = (profile) => {
@@ -143,6 +146,15 @@ class Comments extends React.Component {
                   >
                     Удалить
                   </button>
+                )}
+                {this.isCurrentUser(message.user) && (
+                  <input
+                    data-id={message.id}
+                    name="updated-message"
+                    onChange={this.updateMessage}
+                    value={this.state.updatedMessage}
+                    type="text"
+                  />
                 )}
               </div>
             </div>
