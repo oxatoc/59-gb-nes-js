@@ -10,6 +10,7 @@ class Comments extends React.Component {
       message: '',
       profile: null,
       updatedMessage: '',
+      editMessageId: -1,
     };
 
     // Парсим URL, извлекаем id новости
@@ -98,9 +99,8 @@ class Comments extends React.Component {
     });
   };
 
-  updateMessage = (event) => {
-    const idComment = event.target.dataset.id;
-    console.log('input', idComment, event.target.value);
+  handleChange = (event) => {
+    this.setState({ updatedMessage: event.target.value });
     // this.socket.emit('updateComment', {
     //   idComment,
     //   message: event.target.value,
@@ -129,6 +129,17 @@ class Comments extends React.Component {
     });
   };
 
+  toggleEditMode = (editMessageId, message = null) => {
+    this.setState({ editMessageId });
+    if (editMessageId > 0) {
+      this.state.updatedMessage = message;
+    }
+  };
+
+  updateMessage = (event) => {
+    console.log('update', this.state.editMessageId, this.state.updatedMessage);
+  };
+
   render() {
     return (
       <div>
@@ -136,26 +147,74 @@ class Comments extends React.Component {
           return (
             <div key={message + index} className="card mb-1">
               <div className="card-body">
-                <strong>{this.getName(message.user)}</strong>
-                <div>{message.message}</div>
-                {this.isCurrentUser(message.user) && (
-                  <button
-                    className="btn btn-outline-secondary btn-sm"
-                    type="button"
-                    onClick={() => this.handleDelete(message.id)}
-                  >
-                    Удалить
-                  </button>
-                )}
-                {this.isCurrentUser(message.user) && (
-                  <input
-                    data-id={message.id}
-                    name="updated-message"
-                    onChange={this.updateMessage}
-                    value={this.state.updatedMessage}
-                    type="text"
-                  />
-                )}
+                <div className="row">
+                  <div className="col-3">
+                    <strong>{this.getName(message.user)}</strong>
+                  </div>
+                  <div className="col-3">
+                    {this.isCurrentUser(message.user) && (
+                      <button
+                        className="w-100 btn btn-outline-secondary btn-sm"
+                        type="button"
+                        onClick={() => this.handleDelete(message.id)}
+                      >
+                        Del
+                      </button>
+                    )}
+                  </div>
+                  <div className="col-3">
+                    {this.isCurrentUser(message.user) &&
+                      this.state.editMessageId !== message.id && (
+                        <button
+                          className="w-100 btn btn-outline-secondary btn-sm"
+                          type="button"
+                          onClick={() => {
+                            this.toggleEditMode(message.id, message.message);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      )}
+                    {this.isCurrentUser(message.user) &&
+                      this.state.editMessageId === message.id && (
+                        <button
+                          className="w-100 btn btn-outline-secondary btn-sm"
+                          type="button"
+                          onClick={this.updateMessage}
+                        >
+                          Save
+                        </button>
+                      )}
+                  </div>
+                  <div className="col-3">
+                    {this.isCurrentUser(message.user) &&
+                      this.state.editMessageId === message.id && (
+                        <button
+                          className="w-100 btn btn-outline-secondary btn-sm"
+                          type="button"
+                          onClick={() => {
+                            this.toggleEditMode(-1);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col">
+                    {this.state.editMessageId !== message.id && message.message}
+                    {this.state.editMessageId === message.id && (
+                      <input
+                        data-id={message.id}
+                        name="updated-message"
+                        onChange={this.handleChange}
+                        value={this.state.updatedMessage}
+                        type="text"
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
