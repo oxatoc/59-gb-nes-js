@@ -37,7 +37,7 @@ class Comments extends React.Component {
 
   handleClickSend = (event) => {
     if (this.state.message) {
-      this.socketController.send(this.idNews, this.state.message);
+      this.socketController.add(this.idNews, this.state.message);
       this.setState({ message: '' });
     }
   };
@@ -84,7 +84,9 @@ class Comments extends React.Component {
                       : false
                   }
                   onDelete={() => this.socketController.delete(message.id)}
-                  onSave={this.handleUpdateComment}
+                  onSave={(idComment, comment) =>
+                    this.socketController.update(idComment, comment)
+                  }
                 />
               </div>
             );
@@ -180,7 +182,7 @@ function Comment({ message, isEditable, onDelete, onSave }) {
   );
 }
 
-function BaseButton({ caption, handleClick = null }) {
+function BaseButton({ caption, handleClick }) {
   return (
     <button
       className="w-100 btn btn-outline-secondary btn-sm"
@@ -254,15 +256,21 @@ class SocketController {
       onUpdate(comment);
     });
   }
+  add(idNews, message) {
+    // Отправляем на сервер событие добавления комментария
+    return this.socket.emit('addComment', {
+      idNews,
+      message,
+    });
+  }
   delete(idComment) {
     return this.socket.emit('removeComment', {
       idComment,
     });
   }
-  send(idNews, message) {
-    // Отправляем на сервер событие добавления комментария
-    return this.socket.emit('addComment', {
-      idNews,
+  update(idComment, message) {
+    return this.socket.emit('updateComment', {
+      idComment,
       message,
     });
   }
