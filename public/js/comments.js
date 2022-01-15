@@ -31,20 +31,12 @@ class Comments extends React.Component {
     });
   }
 
-  handleNewComment = (event) => {
-    this.setState({ message: event.target.value });
-  };
-
   handleClickSend = (event) => {
     if (this.state.message) {
       this.socketController.add(this.idNews, this.state.message);
       this.setState({ message: '' });
     }
   };
-
-  // handleDeleteComment = (idComment) => {
-  //   this.socketController.delete(idComment);
-  // };
 
   handleSocketNew = (message) => {
     this.setState({ messages: [...this.state.messages, message] });
@@ -101,7 +93,9 @@ class Comments extends React.Component {
               placeholder="Leave a comment here"
               value={this.state.message}
               name="message"
-              onChange={this.handleNewComment}
+              onChange={(event) =>
+                this.setState({ message: event.target.value })
+              }
             />
             <label htmlFor="floatingmessagearea2">Comments</label>
           </div>
