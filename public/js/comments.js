@@ -32,9 +32,13 @@ class Comments extends React.Component {
 
   handleClickSend = (event) => {
     if (this.state.message) {
-      this.socketController.sendMessage(this.idNews, this.state.message);
+      this.socketController.send(this.idNews, this.state.message);
       this.setState({ message: '' });
     }
+  };
+
+  handleDeleteComment = (idComment) => {
+    this.socketController.delete(idComment);
   };
 
   render() {
@@ -50,7 +54,7 @@ class Comments extends React.Component {
                     ? this.state.profile.id === message.user.id
                     : false
                 }
-                onDelete={() => {}}
+                onDelete={this.handleDeleteComment}
                 onEdit={() => {}}
               />
             </div>
@@ -87,9 +91,9 @@ function Comment({ message, isEditable, onDelete, onEdit }) {
   const [newMessage, setMessage] = React.useState('');
   const userService = new UserService();
 
-  const handleDelete = (id) => {
+  const handleDelete = () => {
     if (confirm(`Удалить комментарий id = '${message.id}'?`)) {
-      onDelete(id);
+      onDelete(message.id);
     }
   };
 
@@ -108,7 +112,7 @@ function Comment({ message, isEditable, onDelete, onEdit }) {
         </div>
         {isEditable && (
           <div className="col-3">
-            <BaseButton caption="Delete" handleClick={handleDelete} />
+            <BaseButton caption="Delete" handleClick={() => handleDelete()} />
           </div>
         )}
         {!isEdit && isEditable && (
@@ -212,7 +216,16 @@ class SocketController {
       },
     });
   }
-  sendMessage(idNews, message) {
+  delete(idComment) {
+    return this.socket.emit(
+      'removeComment',
+      {
+        idComment,
+      },
+      (response) => Promise.resolve(response),
+    );
+  }
+  send(idNews, message) {
     // Отправляем на сервер событие добавления комментария
     return this.socket.emit(
       'addComment',
