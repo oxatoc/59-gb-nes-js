@@ -15,8 +15,6 @@ class Comments extends React.Component {
   componentDidMount() {
     this.commentsController.getAllComments(this.idNews).then((messages) => {
       this.setState({ messages });
-      console.log('messages', messages);
-      console.log('state', this.state);
     });
   }
 
@@ -36,6 +34,8 @@ class Comments extends React.Component {
 }
 
 function Comment({ message }) {
+  const { useState } = React;
+  const [isEdit, setEdit] = useState(false);
   const getName = (user) => {
     let name = '';
     if (user) {
@@ -46,15 +46,45 @@ function Comment({ message }) {
     return name;
   };
   return (
-    <div className="row">
-      <div className="col">
-        <b>{getName(message.user)}</b>
+    <div>
+      <div className="row">
+        <div className="col-3">
+          <b>{getName(message.user)}</b>
+        </div>
+        <div className="col-3">
+          <BaseButton caption="Удалить" />
+        </div>
+        {!isEdit && (
+          <div className="col-6">
+            <BaseButton caption="Редактировать" />
+          </div>
+        )}
+        {isEdit && (
+          <div className="col-3">
+            <BaseButton caption="Сохранить" />
+          </div>
+        )}
+        {isEdit && (
+          <div className="col-3">
+            <BaseButton caption="Отменить" />
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function BaseButton(props) {}
+function BaseButton({ caption, handleClick = null }) {
+  return (
+    <button
+      className="w-100 btn btn-outline-secondary btn-sm"
+      type="button"
+      onClick={handleClick}
+    >
+      {caption}
+    </button>
+  );
+}
 
 class CommentsController {
   async getAllComments(idNews) {
