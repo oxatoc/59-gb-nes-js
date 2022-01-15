@@ -47,11 +47,15 @@ class Comments extends React.Component {
   };
 
   handleSocketNew = (message) => {
-    this.setState((state) => {
-      return { messages: [...state.messages, message] };
+    this.setState({ messages: [...this.state.messages, message] });
+  };
+  handleSocketRemove = (idComment) => {
+    this.setState({
+      messages: this.state.messages.filter(
+        (message) => message.id !== +idComment,
+      ),
     });
   };
-  handleSocketRemove = (idComment) => {};
   handleSocketUpdate = (comment) => {};
 
   render() {
@@ -224,7 +228,6 @@ class SocketController {
       },
     });
     // Подписываемся на событие появления нового комментария
-    this.socket.on();
     this.socket.on('newComment', (comment) => {
       onNew(comment);
     });
