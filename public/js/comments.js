@@ -120,19 +120,19 @@ function Comment({ message, isEditable, onDelete, onSave }) {
   const [newMessage, setMessage] = React.useState('');
   const userService = new UserService();
 
-  const handleDelete = () => {
+  const handleDelete = React.useCallback(() => {
     if (confirm(`Удалить комментарий id = '${message.id}'?`)) {
       onDelete();
     }
-  };
+  });
 
-  const toggleEdit = () => {
+  const toggleEdit = React.useCallback(() => {
     if (!isEditable) {
       return;
     }
     setMessage(message.message);
     setEdit(!isEdit);
-  };
+  });
 
   return (
     <div>
@@ -142,12 +142,12 @@ function Comment({ message, isEditable, onDelete, onSave }) {
         </div>
         {isEditable && (
           <div className="col-3">
-            <BaseButton caption="Delete" handleClick={() => handleDelete()} />
+            <BaseButton caption="Delete" handleClick={handleDelete} />
           </div>
         )}
         {!isEdit && isEditable && (
           <div className="col-6">
-            <BaseButton caption="Edit" handleClick={() => toggleEdit()} />
+            <BaseButton caption="Edit" handleClick={toggleEdit} />
           </div>
         )}
         {isEdit && (
@@ -160,7 +160,7 @@ function Comment({ message, isEditable, onDelete, onSave }) {
         )}
         {isEdit && (
           <div className="col-3">
-            <BaseButton caption="Cancel" handleClick={() => toggleEdit()} />
+            <BaseButton caption="Cancel" handleClick={toggleEdit} />
           </div>
         )}
       </div>
