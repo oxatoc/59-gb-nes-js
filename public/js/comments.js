@@ -50,9 +50,6 @@ class Comments extends React.Component {
   };
   handleSocketUpdate = (comment) => {};
 
-  handleUpdateComment = (idComment, comment) => {
-    console.log('handleChange', idComment, comment);
-  };
 
   render() {
     return (
