@@ -56,9 +56,8 @@ export class SocketCommentsGateway
     commentsEntity.message = message;
 
     const _comment = await this.commentsService.create(commentsEntity);
-    console.log('send to');
-    this.server.emit('newComment', _comment);
-    // this.server.to(idNews.toString()).emit('newComment', _comment);
+    // this.server.emit('newComment', _comment);
+    this.server.to(idNews.toString()).emit('newComment', _comment);
   }
 
   @UseGuards(WsJwtGuard)
@@ -67,7 +66,9 @@ export class SocketCommentsGateway
     client: Socket,
     payload: { idComment: number; message: string },
   ) {
-    console.log('payload', payload.idComment, payload.message);
+    const commentsEntity = new CommentsEntity();
+    commentsEntity.message = payload.message;
+    await this.commentsService.update(payload.idComment, commentsEntity);
   }
 
   @UseGuards(WsJwtGuard)
