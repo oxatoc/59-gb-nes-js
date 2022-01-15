@@ -26,8 +26,15 @@ class Comments extends React.Component {
     });
   }
 
-  handleChange = (event) => {
+  handleChangeComment = (event) => {
     this.setState({ message: event.target.value });
+  };
+
+  handleClickSend = (event) => {
+    if (this.state.message) {
+      this.socketController.sendMessage(this.idNews, this.state.message);
+      this.setState({ message: '' });
+    }
   };
 
   render() {
@@ -59,17 +66,12 @@ class Comments extends React.Component {
               placeholder="Leave a comment here"
               value={this.state.message}
               name="message"
-              onChange={() => this.handleChange}
+              onChange={this.handleChangeComment}
             />
             <label htmlFor="floatingmessagearea2">Comments</label>
           </div>
           <button
-            onClick={() => {
-              this.socketController.sendMessage(
-                this.idNews,
-                this.state.message,
-              );
-            }}
+            onClick={this.handleClickSend}
             className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
           >
             Send
@@ -155,7 +157,6 @@ class CommentsController {
     return this.httpService
       .get(`/news-comments/all?idNews=${idNews}`)
       .then((comments) => {
-        console.log('comments', comments);
         if (comments) {
           return comments.sort((a, b) =>
             a.createdAt === b.createdAt
@@ -197,7 +198,6 @@ class HttpService {
 
 class SocketController {
   constructor() {
-    this.bearerToken = localStorage.getItem('nest_access_token');
     this.socket = io('http://localhost:3001', {
       query: {
         newsId: this.idNews,
@@ -205,7 +205,8 @@ class SocketController {
       transportOptions: {
         polling: {
           extraHeaders: {
-            Authorization: 'Bearer ' + this.bearerToken,
+            Authorization:
+              'Bearer ' + localStorage.getItem('nest_access_token'),
           },
         },
       },
@@ -213,10 +214,14 @@ class SocketController {
   }
   sendMessage(idNews, message) {
     // Отправляем на сервер событие добавления комментария
-    return this.socket.emit('addComment', {
-      idNews,
-      message,
-    });
+    return this.socket.emit(
+      'addComment',
+      {
+        idNews,
+        message,
+      },
+      (response) => Promise.resolve(response),
+    );
   }
 }
 
