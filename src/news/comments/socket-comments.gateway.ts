@@ -56,7 +56,9 @@ export class SocketCommentsGateway
     commentsEntity.message = message;
 
     const _comment = await this.commentsService.create(commentsEntity);
-    this.server.to(idNews.toString()).emit('newComment', _comment);
+    console.log('send to');
+    this.server.emit('newComment', _comment);
+    // this.server.to(idNews.toString()).emit('newComment', _comment);
   }
 
   @UseGuards(WsJwtGuard)
@@ -100,7 +102,7 @@ export class SocketCommentsGateway
   handleConnection(client: Socket, ...args: any[]) {
     const { newsId } = client.handshake.query;
     if (newsId) {
-      client.join(newsId.toString());
+      client.join(newsId.toString()); //подписать клиента на комнату этой новости
     }
     this.logger.log(`Client connected: ${client.id}`);
   }

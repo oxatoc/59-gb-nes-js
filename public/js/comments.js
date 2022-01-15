@@ -9,12 +9,17 @@ class Comments extends React.Component {
       messages: [],
       profile: null,
     };
+    this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
     this.commentsController = new CommentsController();
     this.profileController = new ProfileController();
-    this.socketController = new SocketController();
+    this.socketController = new SocketController({
+      newsId: this.idNews,
+      onNew: this.handleSocketNew,
+      onRemove: this.handleSocketRemove,
+      onUpdate: this.handleSocketUpdate,
+    });
     this.userService = new UserService();
     // Парсим URL, извлекаем id новости
-    this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
   }
 
   componentDidMount() {
@@ -41,25 +46,41 @@ class Comments extends React.Component {
     this.socketController.delete(idComment);
   };
 
+  handleSocketNew = (message) => {
+    this.setState((state) => {
+      return { messages: [...state.messages, message] };
+    });
+  };
+  handleSocketRemove = (idComment) => {};
+  handleSocketUpdate = (comment) => {};
+
   render() {
     return (
       <div>
-        {this.state.messages.map((message, index) => {
-          return (
-            <div key={message + index} className="card mb-1">
-              <Comment
-                message={message}
-                isEditable={
-                  this.state.profile
-                    ? this.state.profile.id === message.user.id
-                    : false
-                }
-                onDelete={this.handleDeleteComment}
-                onEdit={() => {}}
-              />
-            </div>
-          );
-        })}
+        {this.state.messages
+          .sort((a, b) =>
+            a.createdAt === b.createdAt
+              ? 0
+              : a.createdAt > b.createdAt
+              ? -1
+              : 1,
+          )
+          .map((message, index) => {
+            return (
+              <div key={message + index} className="card mb-1">
+                <Comment
+                  message={message}
+                  isEditable={
+                    this.state.profile
+                      ? this.state.profile.id === message.user.id
+                      : false
+                  }
+                  onDelete={this.handleDeleteComment}
+                  onEdit={() => {}}
+                />
+              </div>
+            );
+          })}
         <div>
           <div>
             <b>{this.userService.getName(this.state.profile)}</b>
@@ -158,20 +179,7 @@ class CommentsController {
     this.httpService = new HttpService();
   }
   async getAllComments(idNews) {
-    return this.httpService
-      .get(`/news-comments/all?idNews=${idNews}`)
-      .then((comments) => {
-        if (comments) {
-          return comments.sort((a, b) =>
-            a.createdAt === b.createdAt
-              ? 0
-              : a.createdAt > b.createdAt
-              ? -1
-              : 1,
-          );
-        }
-        return comments;
-      });
+    return this.httpService.get(`/news-comments/all?idNews=${idNews}`);
   }
 }
 
@@ -201,10 +209,10 @@ class HttpService {
 }
 
 class SocketController {
-  constructor() {
+  constructor({ newsId, onNew, onRemove, onUpdate }) {
     this.socket = io('http://localhost:3001', {
       query: {
-        newsId: this.idNews,
+        newsId,
       },
       transportOptions: {
         polling: {
@@ -214,6 +222,19 @@ class SocketController {
           },
         },
       },
+    });
+    // Подписываемся на событие появления нового комментария
+    this.socket.on();
+    this.socket.on('newComment', (comment) => {
+      onNew(comment);
+    });
+    this.socket.on('removeComment', (payload) => {
+      const { id } = payload;
+      onRemove(id);
+    });
+    this.socket.on('updateComment', (payload) => {
+      const { comment } = payload;
+      onUpdate(comment);
     });
   }
   delete(idComment) {
@@ -233,7 +254,9 @@ class SocketController {
         idNews,
         message,
       },
-      (response) => Promise.resolve(response),
+      (response) => {
+        return Promise.resolve(response);
+      },
     );
   }
 }
