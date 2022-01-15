@@ -25,11 +25,11 @@
 <a href="/news/2/detail" class="btn btn-outline-primary" target="_blank">Детальная информация новости</a>
 <script>
 
-  const username = document.querySelector('#email').value
-  const password = document.querySelector('#password').value
 
   document.querySelector('#button-auth')
   .addEventListener('click', event => {
+    const username = document.querySelector('#email').value
+    const password = document.querySelector('#password').value
     return fetch('/auth/login', {
       method: 'POST',
       headers: {

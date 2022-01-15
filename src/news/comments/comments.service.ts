@@ -20,12 +20,15 @@ export class CommentsService {
   async findById(id: number) {
     return await this.commentsRepository.findOneOrFail(
       { id },
-      { relations: ['news'] },
+      { relations: ['news', 'user'] },
     );
   }
 
   async findAll(news: NewsEntity) {
-    return await this.commentsRepository.find({ news });
+    return await this.commentsRepository.find({
+      where: { news },
+      relations: ['user'],
+    });
   }
 
   async index() {
@@ -47,6 +50,12 @@ export class CommentsService {
   }
 
   async update(id: number, comment: CommentsEntity) {
-    return await this.commentsRepository.update(id, comment);
+    const result = await this.commentsRepository.update(id, comment);
+    const newComment = await this.findById(id);
+    this.eventEmitter.emit('comment.update', {
+      newsId: newComment.news.id,
+      comment: newComment,
+    });
+    return result;
   }
 }

@@ -5,9 +5,7 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
 } from '@nestjs/websockets';
-import * as cookie from 'cookie';
 import { Logger, UseGuards } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { CommentsService } from './comments.service';
@@ -16,9 +14,12 @@ import { CommentsEntity } from './comments.entity';
 import { UsersService } from '../../users/users.service';
 import { NewsService } from '../news.service';
 import { OnEvent } from '@nestjs/event-emitter';
+import { Role } from '../../auth/role/role.enum';
+import { WsRolesOrUser } from '../../auth/role/ws-roles.decorator';
 
-export type Comment = { idNews: number; name: string; message: string };
+export type Comment = { idNews: number; message: string };
 export type RemovedComment = { commentId: number; newsId: number };
+export type UpdatedComment = { newsId: number; comment: CommentsEntity };
 
 @WebSocketGateway(3001, {
   cors: {
@@ -57,10 +58,34 @@ export class SocketCommentsGateway
     this.server.to(idNews.toString()).emit('newComment', _comment);
   }
 
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('updateComment')
+  async handleUpdate(
+    client: Socket,
+    payload: { idComment: number; message: string },
+  ) {
+    const commentsEntity = new CommentsEntity();
+    commentsEntity.message = payload.message;
+    await this.commentsService.update(payload.idComment, commentsEntity);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('removeComment')
+  @WsRolesOrUser(Role.Admin)
+  async handleRemove(client: Socket, payload: { idComment: number }) {
+    await this.commentsService.remove(payload.idComment);
+  }
+
   @OnEvent('comment.remove')
   handleRemoveCommentEvent(payload: RemovedComment) {
     const { commentId, newsId } = payload;
     this.server.to(newsId.toString()).emit('removeComment', { id: commentId });
+  }
+
+  @OnEvent('comment.update')
+  handleUpdateCommentEvent(payload: UpdatedComment) {
+    const { comment, newsId } = payload;
+    this.server.to(newsId.toString()).emit('updateComment', { comment });
   }
 
   // событие срабатывает после инициализации сервера
@@ -76,7 +101,7 @@ export class SocketCommentsGateway
   handleConnection(client: Socket, ...args: any[]) {
     const { newsId } = client.handshake.query;
     if (newsId) {
-      client.join(newsId.toString());
+      client.join(newsId.toString()); //подписать клиента на комнату этой новости
     }
     this.logger.log(`Client connected: ${client.id}`);
   }
