@@ -6,8 +6,10 @@ class Comments extends React.Component {
     super(props);
     this.state = {
       messages: [],
+      profile: null,
     };
     this.commentsController = new CommentsController();
+    this.profileController = new ProfileController();
     // Парсим URL, извлекаем id новости
     this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
   }
@@ -15,6 +17,9 @@ class Comments extends React.Component {
   componentDidMount() {
     this.commentsController.getAllComments(this.idNews).then((messages) => {
       this.setState({ messages });
+    });
+    this.profileController.getProfile().then((profile) => {
+      this.setState({ profile });
     });
   }
 
@@ -24,7 +29,16 @@ class Comments extends React.Component {
         {this.state.messages.map((message, index) => {
           return (
             <div key={message + index} className="card mb-1">
-              <Comment message={message} />
+              <Comment
+                message={message}
+                isEditable={
+                  this.state.profile
+                    ? this.state.profile.id === message.user.id
+                    : false
+                }
+                deleteCallback={() => {}}
+                editCallback={() => {}}
+              />
             </div>
           );
         })}
@@ -33,9 +47,9 @@ class Comments extends React.Component {
   }
 }
 
-function Comment({ message }) {
-  const { useState } = React;
-  const [isEdit, setEdit] = useState(false);
+function Comment({ message, isEditable, deleteCallback, editCallback }) {
+  const [isEdit, setEdit] = React.useState(false);
+  const [newMessage, setMessage] = React.useState('');
   const getName = (user) => {
     let name = '';
     if (user) {
@@ -45,6 +59,20 @@ function Comment({ message }) {
     }
     return name;
   };
+
+  const handleDelete = (id) => {
+    if (confirm(`Удалить комментарий id = '${message.id}'?`)) {
+      deleteCallback(id);
+    }
+  };
+
+  const toggleEdit = () => {
+    if (!isEditable) {
+      return;
+    }
+    setEdit(!isEdit);
+  };
+
   return (
     <div>
       <div className="row">
@@ -52,21 +80,27 @@ function Comment({ message }) {
           <b>{getName(message.user)}</b>
         </div>
         <div className="col-3">
-          <BaseButton caption="Удалить" />
+          <BaseButton caption="Удалить" handleClick={handleDelete} />
         </div>
-        {!isEdit && (
+        {!isEdit && isEditable && (
           <div className="col-6">
-            <BaseButton caption="Редактировать" />
+            <BaseButton
+              caption="Редактировать"
+              handleClick={() => toggleEdit()}
+            />
           </div>
         )}
         {isEdit && (
           <div className="col-3">
-            <BaseButton caption="Сохранить" />
+            <BaseButton
+              caption="Сохранить"
+              handleClick={editCallback(message.id, newMessage)}
+            />
           </div>
         )}
         {isEdit && (
           <div className="col-3">
-            <BaseButton caption="Отменить" />
+            <BaseButton caption="Отменить" handleClick={() => toggleEdit()} />
           </div>
         )}
       </div>
@@ -88,19 +122,44 @@ function BaseButton({ caption, handleClick = null }) {
 
 class CommentsController {
   async getAllComments(idNews) {
-    const response = await fetch(`/news-comments/all?idNews=${idNews}`, {
-      method: 'GET',
-    });
-
-    if (response.ok) {
-      const comments = await response.json();
-      return comments.sort((a, b) =>
-        a.createdAt === b.createdAt ? 0 : a.createdAt > b.createdAt ? -1 : 1,
-      );
-    }
-    return null;
+    return httpService
+      .get(`/news-comments/all?idNews=${idNews}`)
+      .then((comments) => {
+        if (comments) {
+          return comments.sort((a, b) =>
+            a.createdAt === b.createdAt
+              ? 0
+              : a.createdAt > b.createdAt
+              ? -1
+              : 1,
+          );
+        }
+        return comments;
+      });
   }
 }
+
+class ProfileController {
+  getProfile() {
+    return httpService.get('/profile');
+  }
+}
+
+const httpService = {
+  get(url) {
+    return fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('nest_access_token')}`,
+      },
+    }).then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      return null;
+    });
+  },
+};
 
 class SocketController {
   constructor() {
