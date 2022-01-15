@@ -120,10 +120,6 @@ function Comment({ message, isEditable, onDelete, onSave }) {
   const [newMessage, setMessage] = React.useState('');
   const userService = new UserService();
 
-  const handleChange = (event) => {
-    setMessage(event.target.value);
-  };
-
   const handleDelete = () => {
     if (confirm(`Удалить комментарий id = '${message.id}'?`)) {
       onDelete();
@@ -174,7 +170,7 @@ function Comment({ message, isEditable, onDelete, onSave }) {
           <input
             className="w-100"
             name="updated-message"
-            onChange={handleChange}
+            onChange={(event) => setMessage(event.target.value)}
             value={newMessage}
             type="text"
           />
