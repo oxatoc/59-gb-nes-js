@@ -104,30 +104,32 @@ function Comment({ message, isEditable, onDelete, onEdit }) {
         <div className="col-3">
           <b>{userService.getName(message.user)}</b>
         </div>
-        <div className="col-3">
-          <BaseButton caption="Удалить" handleClick={handleDelete} />
-        </div>
+        {isEditable && (
+          <div className="col-3">
+            <BaseButton caption="Delete" handleClick={handleDelete} />
+          </div>
+        )}
         {!isEdit && isEditable && (
           <div className="col-6">
-            <BaseButton
-              caption="Редактировать"
-              handleClick={() => toggleEdit()}
-            />
+            <BaseButton caption="Edit" handleClick={() => toggleEdit()} />
           </div>
         )}
         {isEdit && (
           <div className="col-3">
             <BaseButton
-              caption="Сохранить"
+              caption="Save"
               handleClick={onEdit(message.id, newMessage)}
             />
           </div>
         )}
         {isEdit && (
           <div className="col-3">
-            <BaseButton caption="Отменить" handleClick={() => toggleEdit()} />
+            <BaseButton caption="Cancel" handleClick={() => toggleEdit()} />
           </div>
         )}
+      </div>
+      <div className="row">
+        <div className="col text-primary">{message.message}</div>
       </div>
     </div>
   );
