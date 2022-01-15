@@ -35,7 +35,7 @@ class Comments extends React.Component {
   }
 }
 
-function Comment(props) {
+function Comment({ message }) {
   const getName = (user) => {
     let name = '';
     if (user) {
@@ -48,11 +48,13 @@ function Comment(props) {
   return (
     <div className="row">
       <div className="col">
-        <b>{getName(props.message.user)}</b>
+        <b>{getName(message.user)}</b>
       </div>
     </div>
   );
 }
+
+function BaseButton(props) {}
 
 class CommentsController {
   async getAllComments(idNews) {
