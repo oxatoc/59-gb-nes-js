@@ -5,11 +5,14 @@ class Comments extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      message: '',
       messages: [],
       profile: null,
     };
     this.commentsController = new CommentsController();
     this.profileController = new ProfileController();
+    this.socketController = new SocketController();
+    this.userService = new UserService();
     // Парсим URL, извлекаем id новости
     this.idNews = parseInt(window.location.href.split('/').reverse()[1]);
   }
@@ -22,6 +25,10 @@ class Comments extends React.Component {
       this.setState({ profile });
     });
   }
+
+  handleChange = (event) => {
+    this.setState({ message: event.target.value });
+  };
 
   render() {
     return (
@@ -36,33 +43,51 @@ class Comments extends React.Component {
                     ? this.state.profile.id === message.user.id
                     : false
                 }
-                deleteCallback={() => {}}
-                editCallback={() => {}}
+                onDelete={() => {}}
+                onEdit={() => {}}
               />
             </div>
           );
         })}
+        <div>
+          <div>
+            <b>{this.userService.getName(this.state.profile)}</b>
+          </div>
+          <div className="form-floating mb-1">
+            <textarea
+              className="form-control"
+              placeholder="Leave a comment here"
+              value={this.state.message}
+              name="message"
+              onChange={() => this.handleChange}
+            />
+            <label htmlFor="floatingmessagearea2">Comments</label>
+          </div>
+          <button
+            onClick={() => {
+              this.socketController.sendMessage(
+                this.idNews,
+                this.state.message,
+              );
+            }}
+            className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
+          >
+            Send
+          </button>
+        </div>
       </div>
     );
   }
 }
 
-function Comment({ message, isEditable, deleteCallback, editCallback }) {
+function Comment({ message, isEditable, onDelete, onEdit }) {
   const [isEdit, setEdit] = React.useState(false);
   const [newMessage, setMessage] = React.useState('');
-  const getName = (user) => {
-    let name = '';
-    if (user) {
-      name += user.firstName;
-      name += ' ';
-      name += user.lastName;
-    }
-    return name;
-  };
+  const userService = new UserService();
 
   const handleDelete = (id) => {
     if (confirm(`Удалить комментарий id = '${message.id}'?`)) {
-      deleteCallback(id);
+      onDelete(id);
     }
   };
 
@@ -77,7 +102,7 @@ function Comment({ message, isEditable, deleteCallback, editCallback }) {
     <div>
       <div className="row">
         <div className="col-3">
-          <b>{getName(message.user)}</b>
+          <b>{userService.getName(message.user)}</b>
         </div>
         <div className="col-3">
           <BaseButton caption="Удалить" handleClick={handleDelete} />
@@ -94,7 +119,7 @@ function Comment({ message, isEditable, deleteCallback, editCallback }) {
           <div className="col-3">
             <BaseButton
               caption="Сохранить"
-              handleClick={editCallback(message.id, newMessage)}
+              handleClick={onEdit(message.id, newMessage)}
             />
           </div>
         )}
@@ -121,10 +146,14 @@ function BaseButton({ caption, handleClick = null }) {
 }
 
 class CommentsController {
+  constructor() {
+    this.httpService = new HttpService();
+  }
   async getAllComments(idNews) {
-    return httpService
+    return this.httpService
       .get(`/news-comments/all?idNews=${idNews}`)
       .then((comments) => {
+        console.log('comments', comments);
         if (comments) {
           return comments.sort((a, b) =>
             a.createdAt === b.createdAt
@@ -140,12 +169,15 @@ class CommentsController {
 }
 
 class ProfileController {
+  constructor() {
+    this.httpService = new HttpService();
+  }
   getProfile() {
-    return httpService.get('/profile');
+    return this.httpService.get('/profile');
   }
 }
 
-const httpService = {
+class HttpService {
   get(url) {
     return fetch(url, {
       headers: {
@@ -158,8 +190,8 @@ const httpService = {
       }
       return null;
     });
-  },
-};
+  }
+}
 
 class SocketController {
   constructor() {
@@ -176,6 +208,25 @@ class SocketController {
         },
       },
     });
+  }
+  sendMessage(idNews, message) {
+    // Отправляем на сервер событие добавления комментария
+    return this.socket.emit('addComment', {
+      idNews,
+      message,
+    });
+  }
+}
+
+class UserService {
+  getName(user) {
+    let name = '';
+    if (user) {
+      name += user.firstName;
+      name += ' ';
+      name += user.lastName;
+    }
+    return name;
   }
 }
 
