@@ -48,7 +48,15 @@ class Comments extends React.Component {
       ),
     });
   };
-  handleSocketUpdate = (comment) => {};
+  handleSocketUpdate = (comment) => {
+    const index = this.state.messages.findIndex(
+      (message) => message.id === comment.id,
+    );
+    if (index >= 0) {
+      this.state.messages[index] = comment;
+      this.setState({ messages: [...this.state.messages] });
+    }
+  };
 
   render() {
     return (
@@ -118,6 +126,11 @@ function Comment({ message, isEditable, onDelete, onSave }) {
     }
   });
 
+  const handleSave = React.useCallback(() => {
+    onSave(message.id, newMessage);
+    setEdit(false);
+  });
+
   const toggleEdit = React.useCallback(() => {
     if (!isEditable) {
       return;
@@ -144,10 +157,7 @@ function Comment({ message, isEditable, onDelete, onSave }) {
         )}
         {isEdit && (
           <div className="col-3">
-            <BaseButton
-              caption="Save"
-              handleClick={() => onSave(message.id, newMessage)}
-            />
+            <BaseButton caption="Save" handleClick={handleSave} />
           </div>
         )}
         {isEdit && (
