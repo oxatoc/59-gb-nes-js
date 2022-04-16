@@ -1,0 +1,83 @@
+-- Adminer 4.8.1 PostgreSQL 12.9 (Ubuntu 12.9-0ubuntu0.20.04.1) dump
+
+CREATE SEQUENCE categories_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."categories" (
+    "id" integer DEFAULT nextval('categories_id_seq') NOT NULL,
+    "name" text NOT NULL,
+    CONSTRAINT "PK_24dbc6126a28ff948da33e97d3b" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+INSERT INTO "categories" ("id", "name") VALUES
+(1,	'Мейкуны');
+
+CREATE SEQUENCE comments_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."comments" (
+    "id" integer DEFAULT nextval('comments_id_seq') NOT NULL,
+    "message" text NOT NULL,
+    "createdAt" timestamp DEFAULT now() NOT NULL,
+    "updatedAt" timestamp DEFAULT now() NOT NULL,
+    "userId" integer,
+    "newsId" integer,
+    CONSTRAINT "PK_8bf68bc960f2b69e818bdb90dcb" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+INSERT INTO "comments" ("id", "message", "createdAt", "updatedAt", "userId", "newsId") VALUES
+(69,	'test69',	'2022-01-15 21:33:06.39',	'2022-01-15 21:33:06.39',	4,	2),
+(70,	'test70',	'2022-01-15 21:45:59.978',	'2022-01-15 21:45:59.978',	4,	2),
+(71,	'test71',	'2022-01-15 21:50:52.368',	'2022-01-15 21:50:52.368',	5,	2),
+(31,	'test31',	'2022-01-14 23:34:13.64',	'2022-01-14 23:34:13.64',	5,	2);
+
+CREATE SEQUENCE news_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."news" (
+    "id" integer DEFAULT nextval('news_id_seq') NOT NULL,
+    "title" text NOT NULL,
+    "description" text NOT NULL,
+    "cover" text,
+    "createdAt" timestamp DEFAULT now() NOT NULL,
+    "updatedAt" timestamp DEFAULT now() NOT NULL,
+    "categoryId" integer,
+    "userId" integer,
+    CONSTRAINT "PK_39a43dfcb6007180f04aff2357e" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+INSERT INTO "news" ("id", "title", "description", "cover", "createdAt", "updatedAt", "categoryId", "userId") VALUES
+(2,	'news by request',	'description of news by request',	'/news-static/807dde95-dacc-4587-a952-ae8c42fd1176.png',	'2021-12-25 21:02:13.417726',	'2021-12-25 21:02:13.417726',	1,	4);
+
+CREATE TABLE "public"."typeorm_metadata" (
+    "type" character varying NOT NULL,
+    "database" character varying,
+    "schema" character varying,
+    "table" character varying,
+    "name" character varying,
+    "value" text
+) WITH (oids = false);
+
+
+CREATE SEQUENCE users_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."users" (
+    "id" integer DEFAULT nextval('users_id_seq') NOT NULL,
+    "firstName" text NOT NULL,
+    "lastName" text NOT NULL,
+    "email" text NOT NULL,
+    "createdAt" timestamp DEFAULT now() NOT NULL,
+    "updatedAt" timestamp DEFAULT now() NOT NULL,
+    "password" text NOT NULL,
+    "roles" text NOT NULL,
+    CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+INSERT INTO "users" ("id", "firstName", "lastName", "email", "createdAt", "updatedAt", "password", "roles") VALUES
+(4,	'd',	'p',	'test@test.com',	'2021-12-25 16:10:44.109',	'2021-12-25 16:10:44.109',	'$2b$10$L8vhoT7lMPWH4CPY3wdXb.Sg031aJMZo/wupCjcUY63XwnOYblEk2',	'user'),
+(5,	'd1',	'p1',	'test1@test.com',	'2022-01-14 23:17:49.698',	'2022-01-14 23:17:49.698',	'$2b$10$hWyk7FzjtA3JIzjxG2c1s.XllbyUh936wXrcSGE5hb56XiC7VPAiy',	'user');
+
+ALTER TABLE ONLY "public"."comments" ADD CONSTRAINT "FK_7e8d7c49f218ebb14314fdb3749" FOREIGN KEY ("userId") REFERENCES users(id) NOT DEFERRABLE;
+ALTER TABLE ONLY "public"."comments" ADD CONSTRAINT "FK_86fb3a1330e43f9767b3b6df238" FOREIGN KEY ("newsId") REFERENCES news(id) NOT DEFERRABLE;
+
+ALTER TABLE ONLY "public"."news" ADD CONSTRAINT "FK_12a76d9b0f635084194b2c6aa01" FOREIGN KEY ("categoryId") REFERENCES categories(id) NOT DEFERRABLE;
+ALTER TABLE ONLY "public"."news" ADD CONSTRAINT "FK_9198b86c4c22bf6852c43f3b44e" FOREIGN KEY ("userId") REFERENCES users(id) NOT DEFERRABLE;
+
+-- 2022-04-16 14:09:15.53231+03
