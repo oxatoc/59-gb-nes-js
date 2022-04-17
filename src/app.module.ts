@@ -17,6 +17,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { CategoriesEntity } from './categories/categories.entity';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RedisCacheModule } from './redis-cache/redis-cache.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     CategoriesModule,
     AuthModule,
     EventEmitterModule.forRoot(),
+    RedisCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService],

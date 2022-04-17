@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsEntity } from './news.entity';
 import { UsersModule } from '../users/users.module';
 import { CategoriesModule } from '../categories/categories.module';
+import { RedisCacheModule } from 'src/redis-cache/redis-cache.module';
 
 @Module({
   controllers: [NewsController],
@@ -17,6 +18,7 @@ import { CategoriesModule } from '../categories/categories.module';
     CategoriesModule,
     MailModule,
     TypeOrmModule.forFeature([NewsEntity]),
+    RedisCacheModule,
   ],
   exports: [NewsService],
 })

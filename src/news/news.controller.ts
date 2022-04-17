@@ -86,6 +86,11 @@ export class NewsController {
     return await this.newsService.findAll();
   }
 
+  @Get('creators-rating')
+  async getCreatorsRating() {
+    return await this.newsService.getCreatorsRating();
+  }
+
   @Get('users/:id')
   async getByUser(@Param('id') id: number) {
     const user = await this.usersService.findById(id);

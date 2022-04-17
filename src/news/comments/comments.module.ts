@@ -9,6 +9,7 @@ import { UsersEntity } from '../../users/users.entity';
 import { NewsModule } from '../news.module';
 import { SocketCommentsGateway } from './socket-comments.gateway';
 import { AuthModule } from '../../auth/auth.module';
+import { RedisCacheModule } from 'src/redis-cache/redis-cache.module';
 
 @Module({
   providers: [CommentsService, SocketCommentsGateway],
@@ -19,6 +20,7 @@ import { AuthModule } from '../../auth/auth.module';
     UsersModule,
     forwardRef(() => NewsModule),
     TypeOrmModule.forFeature([CommentsEntity, NewsEntity, UsersEntity]),
+    RedisCacheModule,
   ],
 })
 export class CommentsModule {}

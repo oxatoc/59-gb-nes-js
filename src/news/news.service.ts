@@ -5,15 +5,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from './news.entity';
 import { UsersEntity } from '../users/users.entity';
+import { RedisCacheService } from 'src/redis-cache/redis-cache.service';
 
 @Injectable()
 export class NewsService {
   constructor(
     @InjectRepository(NewsEntity)
     private readonly newsRepository: Repository<NewsEntity>,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   async create(news: NewsEntity) {
+    this.redisCacheService.addCreatorScore(news.user.id);
     return await this.newsRepository.save(news);
   }
 
@@ -25,8 +28,18 @@ export class NewsService {
     return await this.newsRepository.find({});
   }
 
-  async findById(id: number) {
-    return await this.newsRepository.findOneOrFail({ id });
+  async findById(id: number): Promise<NewsEntity> {
+    const newsKey = 'news_' + id;
+    const cached = await this.redisCacheService.get(newsKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+    const value = await this.newsRepository.findOneOrFail({ id });
+    if (value) {
+      await this.redisCacheService.set(newsKey, JSON.stringify(value));
+    }
+
+    return value;
   }
 
   async findByUser(user: UsersEntity) {
@@ -76,6 +89,10 @@ export class NewsService {
       return changesItem;
     }
     return null;
+  }
+
+  async getCreatorsRating() {
+    return this.redisCacheService.getCreatorsRating();
   }
 
   async store(id: number, news: NewsEntity) {
