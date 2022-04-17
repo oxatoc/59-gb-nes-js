@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from '../news.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { RedisCacheService } from 'src/redis-cache/redis-cache.service';
 
 @Injectable()
 export class CommentsService {
@@ -11,6 +12,7 @@ export class CommentsService {
     @InjectRepository(CommentsEntity)
     private readonly commentsRepository: Repository<CommentsEntity>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   async create(comment: CommentsEntity) {
@@ -25,10 +27,19 @@ export class CommentsService {
   }
 
   async findAll(news: NewsEntity) {
-    return await this.commentsRepository.find({
+    const commentKey = 'comments_by_news_' + news.id;
+    const cached = await this.redisCacheService.get(commentKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+    const value = await this.commentsRepository.find({
       where: { news },
       relations: ['user'],
     });
+    if (value) {
+      await this.redisCacheService.set(commentKey, JSON.stringify(value));
+    }
+    return value;
   }
 
   async index() {
