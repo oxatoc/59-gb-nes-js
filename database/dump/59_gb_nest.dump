@@ -1,6 +1,6 @@
 -- Adminer 4.8.1 PostgreSQL 12.9 (Ubuntu 12.9-0ubuntu0.20.04.1) dump
 
-CREATE SEQUENCE categories_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+CREATE SEQUENCE categories_id_seq INCREMENT 1 MINVALUE 2 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."categories" (
     "id" integer DEFAULT nextval('categories_id_seq') NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE "public"."categories" (
 INSERT INTO "categories" ("id", "name") VALUES
 (1,	'Мейкуны');
 
-CREATE SEQUENCE comments_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+CREATE SEQUENCE comments_id_seq INCREMENT 1 MINVALUE 72 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."comments" (
     "id" integer DEFAULT nextval('comments_id_seq') NOT NULL,
@@ -29,7 +29,7 @@ INSERT INTO "comments" ("id", "message", "createdAt", "updatedAt", "userId", "ne
 (71,	'test71',	'2022-01-15 21:50:52.368',	'2022-01-15 21:50:52.368',	5,	2),
 (31,	'test31',	'2022-01-14 23:34:13.64',	'2022-01-14 23:34:13.64',	5,	2);
 
-CREATE SEQUENCE news_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+CREATE SEQUENCE news_id_seq INCREMENT 1 MINVALUE 3 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."news" (
     "id" integer DEFAULT nextval('news_id_seq') NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE "public"."typeorm_metadata" (
 ) WITH (oids = false);
 
 
-CREATE SEQUENCE users_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+CREATE SEQUENCE users_id_seq INCREMENT 1 MINVALUE 6 MAXVALUE 2147483647 CACHE 1;
 
 CREATE TABLE "public"."users" (
     "id" integer DEFAULT nextval('users_id_seq') NOT NULL,
